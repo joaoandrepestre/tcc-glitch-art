@@ -13,7 +13,7 @@ class Noise extends Effect {
     }
   };
 
-  static define_fx_function = (effect) => (image, noiseFactor) => effect(image, { noiseFactor });
+  static define_fx_function = (effect) => (texture, noiseFactor) => effect(texture, { noiseFactor });
 
   constructor() {
     super();
@@ -24,8 +24,8 @@ class Noise extends Effect {
     this.noiseFactor = [redFactor, greenFactor, blueFactor];
   }
 
-  apply(src_image) {
-    Noise.fx_function(src_image, this.noiseFactor);
+  apply(texture) {
+    return Noise.fx_function(texture, this.noiseFactor);
   }
 }
 

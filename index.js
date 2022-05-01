@@ -38,7 +38,7 @@ window.onload = async () => {
   regl.frame(() => {
     if (updated) {
       //updated = false;
-      fx.apply(image);
+      fx.apply(regl, image);
     }
   });
 };

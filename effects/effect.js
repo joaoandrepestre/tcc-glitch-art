@@ -2,8 +2,9 @@
 // and static helper functions for initializing the effects
 class Effect {
 
-  // defines how to transform the regl command into a function of the form (image) => diplaying the image
-  static define_fx_function = (effect) => (image) => effect(image);
+  // defines how to transform the regl command into a function 
+  // of the form (texture) => texture
+  static define_fx_function = (effect) => (texture) => effect(texture);
 
   // basic regl config for displaying an image, used by all effects
   static basicConfig = {
@@ -52,12 +53,17 @@ class Effect {
     };
   };
 
-  // given a config and a regl instance, defines the regl command and returns a function of the form (image, props) => applies the command
+  // given a config and a regl instance, defines the regl command and returns 
+  // a function of the form (texture, props) => texture
   static getEffect = (regl, config) => {
     const command = regl(config);
-    return (image, props = {}) => {
-      const texture = regl.texture({ data: image, flipY: true });
-      return command({ texture: texture, ...props });
+    return (texture, props = {}) => {
+      command({ texture: texture, ...props });
+      return regl.texture({
+        width: 512,
+        height: 512,
+        copy: true
+      });
     };
   };
 
