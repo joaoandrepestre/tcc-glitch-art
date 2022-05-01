@@ -1,5 +1,4 @@
-import { getIdentityEffect } from './effects/identity/identity.js';
-import { getNoiseEffect } from './effects/noise/noise.js';
+import { EffectsChain } from './effects/effects_chain.js';
 
 let updated = false;
 let image = new Image();
@@ -31,13 +30,15 @@ function loadImage(event) {
 
 window.onload = async () => {
   const regl = createREGL("#canvas");
-  const identity = await getIdentityEffect(regl);
-  const noise = await getNoiseEffect(regl);
+  await EffectsChain.init(regl);
+
+  const fx = new EffectsChain();
+  fx.addEffect('noise');
 
   regl.frame(() => {
     if (updated) {
-      updated = false;
-      noise(image, 0.4, 0.5, 0.8);
+      //updated = false;
+      fx.apply(image);
     }
   });
 };

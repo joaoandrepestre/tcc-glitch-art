@@ -1,12 +1,11 @@
-import { basicConfig, setShaders, getEffect } from "../effect_basics.js";
+import { Effect } from "../effect.js";
 
-const getIdentityEffect = async (regl) => {
+class Identity extends Effect {
+  static name = 'identity';
 
-  let config = { ...basicConfig };
-  await setShaders(config);
+  apply(src_image) {
+    Identity.fx_function(src_image);
+  }
+}
 
-  const effect = getEffect(regl, config);
-  return (image) => effect(image);
-};
-
-export { getIdentityEffect };
+export { Identity };

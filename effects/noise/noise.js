@@ -1,20 +1,29 @@
-import { basicConfig, setShaders, getEffect } from "../effect_basics.js";
+import { Effect } from "../effect.js";
 
-const getNoiseEffect = async (regl) => {
-
-  const uniforms = {
-    ...basicConfig.uniforms,
-    redFactor: (_, props) => props.redFactor,
-    greenFactor: (_, props) => props.greenFactor,
-    blueFactor: (_, props) => props.blueFactor,
-    time: ctx => ctx.time
+class Noise extends Effect {
+  static name = 'noise';
+  static extra_config = {
+    uniforms: {
+      ...Effect.basicConfig.uniforms,
+      noiseFactor: (_, props) => props.noiseFactor,
+      time: ctx => ctx.time
+    }
   };
 
-  let config = { ...basicConfig, uniforms: uniforms };
-  await setShaders(config, 'noise');
+  static define_fx_function = (effect) => (image, noiseFactor) => effect(image, { noiseFactor });
 
-  const effect = getEffect(regl, config);
-  return (image, redFactor, greenFactor, blueFactor) => effect(image, { redFactor, greenFactor, blueFactor });
-};
+  constructor() {
+    super();
+    this.noiseFactor = [0.5, 0.5, 0.5];
+  }
 
-export { getNoiseEffect };
+  setNoiseFactor(redFactor, greenFactor, blueFactor) {
+    this.noiseFactor = [redFactor, greenFactor, blueFactor];
+  }
+
+  apply(src_image) {
+    Noise.fx_function(src_image, this.noiseFactor);
+  }
+}
+
+export { Noise };
