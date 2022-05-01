@@ -33,7 +33,8 @@ window.onload = async () => {
   await EffectsChain.init(regl);
 
   const fx = new EffectsChain();
-  fx.addEffect('noise');
+  //fx.addEffect('noise');
+  fx.addEffect('filter');
 
   regl.frame(() => {
     if (updated) {

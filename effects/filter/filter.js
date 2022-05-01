@@ -1,0 +1,42 @@
+import { Effect } from "../effect.js";
+
+// Filter effect, applies a rgb filter to the image
+// parameters:
+//  - threshold: from 0 to 1, indicates the cut-off point for the filter for each rgb component
+//  - high_low: 1 or -1, indicates if the filter is low pass or high pass. Defaults to 1, high pass
+class Filter extends Effect {
+  static name = 'filter';
+  static extra_config = {
+    uniforms: {
+      ...Effect.basicConfig.uniforms,
+      threshold: (_, props) => props.threshold,
+      high_low: (_, props) => props.high_low
+    }
+  };
+
+  static define_fx_function = (effect) => (texture, threshold, high_low) => effect(texture, { threshold, high_low });
+
+  constructor() {
+    super();
+    this.threshold = [0.5, 0.5, 0.5];
+    this.high_low = 1.0;
+  }
+
+  setTreshold(redThreshold, greenThreshold, blueThreshold) {
+    this.treshold = [redThreshold, greenThreshold, blueThreshold];
+  }
+
+  setToHighPass() {
+    this.high_low = 1.0;
+  }
+
+  setToLowPass() {
+    this.high_low = -1.0;
+  }
+
+  apply(texture) {
+    return Filter.fx_function(texture, this.threshold, this.high_low)
+  }
+}
+
+export { Filter };

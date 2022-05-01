@@ -1,6 +1,7 @@
 import { Effect } from "./effect.js";
 import { Identity } from "./identity/identity.js";
 import { Noise } from "./noise/noise.js";
+import { Filter } from "./filter/filter.js";
 
 // Chain of effects to be applied in order
 class EffectsChain {
@@ -11,11 +12,13 @@ class EffectsChain {
   static init = async (regl) => {
     await Promise.all([
       Effect.init_effect(Identity, regl),
-      Effect.init_effect(Noise, regl)
+      Effect.init_effect(Noise, regl),
+      Effect.init_effect(Filter, regl)
     ]);
 
     EffectsChain.fx_reg['identity'] = Identity;
     EffectsChain.fx_reg['noise'] = Noise;
+    EffectsChain.fx_reg['filter'] = Filter;
   }
 
   constructor() {
