@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://npmcdn.com/regl/dist/regl.min.js"></script>
+  <script type="module" src="index.js"></script>
+  <title>Glitch Art - POC</title>
+</head>
+
+<body>
+  <div id="src_image"></div>
+
+  <form id="upload_image">
+    <input type="file" id="file_input" accept="image/*">
+    <button id="submit_image" type="submit" hidden="true"></button>
+  </form>
+
+  <div id="regl_div">
+    <canvas width="400" height="400" id="canvas"></canvas>
+  </div>
+
+</body>
+
+</html>
