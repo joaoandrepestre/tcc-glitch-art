@@ -1,5 +1,8 @@
 import { Effect } from "../effect.js";
 
+// Noise effect, applies some white noise to the image
+// parameters: 
+//  - noiseFactor: factor from 0 to 1 of the intensity of the noise for each color component
 class Noise extends Effect {
   static name = 'noise';
   static extra_config = {
