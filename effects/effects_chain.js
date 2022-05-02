@@ -42,11 +42,12 @@ class EffectsChain {
   }
 
   // Applies all effects, in order, to the src_image
-  apply(regl, src_image) {
-    let texture = regl.texture({ data: src_image, flipY: true });
+  apply(texture) {
+    let t = texture;
     this.fx_chain.forEach(fx => {
-      texture = fx.apply(texture);
+      t = fx.apply(t);
     });
+    return t;
   }
 }
 

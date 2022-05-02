@@ -16,10 +16,6 @@ class Effect {
 
     uniforms: {
       texture: (_, props) => props.texture,
-      aspectRatio: ctx => {
-        const ar = ctx.drawingBufferWidth / ctx.drawingBufferHeight;
-        return ar > 1 ? [ar, 1] : [1, 1 / ar];
-      }
     },
 
     count: 3
@@ -60,9 +56,9 @@ class Effect {
     return (texture, props = {}) => {
       command({ texture: texture, ...props });
       return regl.texture({
-        width: 512,
-        height: 512,
-        copy: true
+        width: texture.width,
+        height: texture.height,
+        copy: true,
       });
     };
   };

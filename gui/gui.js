@@ -3,17 +3,21 @@ import { EffectsChain } from "../effects/effects_chain.js";
 
 
 class Gui {
-  constructor(fx_chain) {
+  constructor(regl, fx_chain) {
     this.fx_chain = fx_chain;
     this.static_zone = document.getElementById('gui_static');
-    this.initStaticZone();
+    this.canvas = document.getElementById('canvas');
+    this.initStaticZone(regl);
     this.dynamic_zone = document.getElementById('gui_dynamic');
-    this.src_image = new Image();
+    this.texture = null;
+    this.out_texture = null;
+
     this.updated = false;
   }
 
-  initStaticZone() {
-    this.createImageUploader();
+  initStaticZone(regl) {
+    this.createImageUploader(regl);
+    this.createImageDownloader();
     this.createEffectSelector();
   }
 
@@ -48,7 +52,7 @@ class Gui {
     return checkbox;
   }
 
-  createImageUploader() {
+  createImageUploader(regl) {
     const div = document.createElement('div');
     const form = document.createElement('form');
 
@@ -56,21 +60,45 @@ class Gui {
     file_input.id = 'file_input';
     file_input.type = 'file';
     file_input.accept = 'image/*';
+    file_input.hidden = true;
 
     const button = this.createSubmitButton((_) => {
       if (!file_input.value.length) return;
 
       let reader = new FileReader();
 
+      let file = file_input.files[0];
       reader.onload = (event) => {
         let str = event.target.result;
-        let div = document.getElementById("src_image");
-        this.src_image.src = str;
-        this.updated = true;
-        div.append(this.src_image);
+        let src_image = new Image();
+        src_image.onload = (e) => {
+          let w = e.target.width;
+          let h = e.target.height;
+          const maxW = window.innerWidth;
+          const maxH = window.innerHeight;
+
+          //if (w > h) {
+          //  if (w > maxW) {
+          //    h = h * (maxW / w);
+          //    w = maxW;
+          //  }
+          //} else {
+          //  if (h > maxH) {
+          //    w = w * (maxH / h);
+          //    h = maxH;
+          //  }
+          //}
+
+          this.texture = regl.texture({ data: src_image, flipY: true });
+          //this.texture.resize(w, h);
+          this.canvas.width = w;
+          this.canvas.height = h;
+          this.updated = true;
+        };
+        src_image.src = str;
       };
 
-      reader.readAsDataURL(file_input.files[0]);
+      reader.readAsDataURL(file);
     });
     button.hidden = true;
     file_input.addEventListener('change', () => button.click());
@@ -79,6 +107,25 @@ class Gui {
     form.appendChild(button);
     div.appendChild(form);
 
+    const main_button = document.createElement('button');
+    main_button.innerHTML = 'Open...'
+    main_button.addEventListener('click', () => file_input.click());
+    div.appendChild(main_button);
+
+    this.static_zone.appendChild(div);
+  }
+
+  createImageDownloader() {
+    const div = document.createElement('div');
+    const button = document.createElement('button');
+    button.innerHTML = 'Save...';
+    button.addEventListener('click', () => {
+      let link = document.createElement('a');
+      link.download = 'output_image.png';
+      link.href = document.getElementById('canvas').toDataURL('image/png');
+      link.click();
+    });
+    div.appendChild(button);
     this.static_zone.appendChild(div);
   }
 
@@ -171,6 +218,11 @@ class Gui {
     div.appendChild(delete_button);
 
     this.dynamic_zone.appendChild(div);
+  }
+
+  update() {
+    this.out_texture = this.fx_chain.apply(this.texture);
+    this.updated = false;
   }
 }
 
