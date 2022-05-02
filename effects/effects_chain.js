@@ -26,6 +26,10 @@ class EffectsChain {
     this.addEffect('identity');
   }
 
+  modified() {
+    return this.fx_chain.length > 1;
+  }
+
   // Adds a new instance of the chosen effect
   addEffect(effect_name) {
     if (!(effect_name in EffectsChain.fx_reg)) throw new Error(`Attempting to add unregistered effect ${effect_name}`);

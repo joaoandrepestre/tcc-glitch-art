@@ -13,6 +13,7 @@ class Gui {
     this.out_texture = null;
 
     this.updated = false;
+    this.image_loaded = false;
   }
 
   initStaticZone(regl) {
@@ -93,6 +94,7 @@ class Gui {
           //this.texture.resize(w, h);
           this.canvas.width = w;
           this.canvas.height = h;
+          this.image_loaded = true;
           this.updated = true;
         };
         src_image.src = str;
@@ -120,6 +122,7 @@ class Gui {
     const button = document.createElement('button');
     button.innerHTML = 'Save...';
     button.addEventListener('click', () => {
+      if (!this.image_loaded || !this.fx_chain.modified()) return;
       let link = document.createElement('a');
       link.download = 'output_image.png';
       link.href = document.getElementById('canvas').toDataURL('image/png');
@@ -135,6 +138,7 @@ class Gui {
     const selector = document.createElement('select');
     selector.setAttribute('id', 'fx_selector');
     for (const key in EffectsChain.fx_reg) {
+      if (key === 'identity') continue;
       const opt = document.createElement('option');
       opt.setAttribute('value', key);
       opt.innerHTML = key;
@@ -143,6 +147,7 @@ class Gui {
     form.appendChild(selector);
 
     const button = this.createSubmitButton((_) => {
+      if (!this.image_loaded) return;
       const fx = this.fx_chain.addEffect(fx_selector.value);
       this.createEffectEditor(fx);
       this.updated = true;
