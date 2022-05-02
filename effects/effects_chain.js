@@ -23,13 +23,22 @@ class EffectsChain {
 
   constructor() {
     this.fx_chain = [];
+    this.addEffect('identity');
   }
 
   // Adds a new instance of the chosen effect
   addEffect(effect_name) {
-    if (!effect_name in EffectsChain.fx_reg) throw new Error(`Attempting to add unregistered effect ${effect_name}`);
+    if (!(effect_name in EffectsChain.fx_reg)) throw new Error(`Attempting to add unregistered effect ${effect_name}`);
 
-    this.fx_chain.push(new EffectsChain.fx_reg[effect_name]);
+    const id = this.fx_chain.length;
+    const fx = new EffectsChain.fx_reg[effect_name](id);
+    this.fx_chain.push(fx);
+    return fx;
+  }
+
+  removeEffect(effect) {
+    const index = this.fx_chain.findIndex(fx => fx === effect);
+    this.fx_chain.splice(index, 1);
   }
 
   // Applies all effects, in order, to the src_image

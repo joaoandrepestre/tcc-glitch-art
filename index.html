@@ -11,16 +11,18 @@
 </head>
 
 <body>
-  <div id="src_image"></div>
-
-  <form id="upload_image">
-    <input type="file" id="file_input" accept="image/*">
-    <button id="submit_image" type="submit" hidden="true"></button>
-  </form>
-
-  <div id="regl_div">
-    <canvas width="512" height="512" id="canvas"></canvas>
+  <div id="gui_static">
   </div>
+
+  <div id="display">
+    <div id="src_image" style="float: left;"></div>
+
+    <div id="regl_div" style="float: right;">
+      <canvas width="512" height="512" id="canvas"></canvas>
+    </div>
+  </div>
+
+  <div id="gui_dynamic"></div>
 
 </body>
 

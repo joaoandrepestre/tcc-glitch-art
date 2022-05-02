@@ -20,8 +20,8 @@ class Noise extends Effect {
     this.noiseFactor = [0.5, 0.5, 0.5];
   }
 
-  setNoiseFactor(redFactor, greenFactor, blueFactor) {
-    this.noiseFactor = [redFactor, greenFactor, blueFactor];
+  setParams(params) {
+    if ('noiseFactor' in params) this.noiseFactor = params['noiseFactor'];
   }
 
   apply(texture) {

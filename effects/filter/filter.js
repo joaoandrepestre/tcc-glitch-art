@@ -22,16 +22,10 @@ class Filter extends Effect {
     this.high_low = 1.0;
   }
 
-  setTreshold(redThreshold, greenThreshold, blueThreshold) {
-    this.treshold = [redThreshold, greenThreshold, blueThreshold];
-  }
-
-  setToHighPass() {
-    this.high_low = 1.0;
-  }
-
-  setToLowPass() {
-    this.high_low = -1.0;
+  setParams(params) {
+    console.log(params);
+    if ('threshold' in params) this.threshold = params['threshold'];
+    if ('high_low' in params) this.high_low = params['high_low'] === 'true' ? -1.0 : 1.0;
   }
 
   apply(texture) {
