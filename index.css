@@ -1,9 +1,47 @@
 body {
   background-color: rgb(55, 69, 80);
+  font-family: "Whitney SSm A", "Whitney SSm B", "Helvetica Neue", Helvetica, Arial, Sans-Serif;
 }
 
 .display {
   float: left;
+}
+
+.header {
+  background-color: rgb(109, 131, 151);
+  margin-top: 0;
+  margin-bottom: 5pt;
+  border-radius: 3pt;
+}
+
+.file-zone {
+  height: 17pt;
+  margin-bottom: 10pt;
+}
+
+.header button {
+  background-color: rgb(50, 75, 99);
+  border-radius: 5pt;
+  color: white;
+}
+
+.image-uploader {
+  float: left;
+  width: 45pt;
+}
+
+.image-downloader {
+  float: left;
+  width: 45pt;
+}
+
+.effect-selector {
+  width: 100pt;
+}
+
+.effect-selector select {
+  background-color: rgb(50, 75, 99);
+  color: white;
 }
 
 .editor {
@@ -11,7 +49,7 @@ body {
   width: 300pt;
   background-color: rgb(109, 131, 151);
   margin-left: 10pt;
-  border-radius: 1pt;
+  border-radius: 3pt;
 }
 
 .effect-editor {
@@ -21,10 +59,11 @@ body {
   border-radius: 5pt;
   position: relative;
   color: white;
-  font-family: sans-serif;
+  font-size: 12pt;
 }
 
 .effect-editor label {
+  margin-top: 1pt;
   margin-left: 3pt;
 }
 
@@ -33,4 +72,12 @@ body {
   background-color: rgb(25, 48, 71);
   margin: 2pt;
   border-radius: 7pt;
+}
+
+.delete_button {
+  border-radius: 50%;
+  text-align: center;
+  float: right;
+  background-color: rgb(25, 48, 71);
+  color: white;
 }

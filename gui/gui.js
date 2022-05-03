@@ -48,6 +48,7 @@ class Gui {
   constructor(regl, fx_chain) {
     this.fx_chain = fx_chain;
     this.static_zone = document.getElementById('gui_static');
+    this.file_zone = document.getElementById('file_zone');
     this.canvas = document.getElementById('canvas');
     this.initStaticZone(regl);
     this.dynamic_zone = document.getElementById('gui_dynamic');
@@ -66,6 +67,7 @@ class Gui {
 
   createImageUploader(regl) {
     const div = document.createElement('div');
+    div.setAttribute('class', 'image-uploader');
     const form = document.createElement('form');
 
     const file_input = document.createElement('input');
@@ -125,11 +127,12 @@ class Gui {
     main_button.addEventListener('click', () => file_input.click());
     div.appendChild(main_button);
 
-    this.static_zone.appendChild(div);
+    this.file_zone.appendChild(div);
   }
 
   createImageDownloader() {
     const div = document.createElement('div');
+    div.setAttribute('class', 'image-downloader');
     const button = document.createElement('button');
     button.innerHTML = 'Save...';
     button.addEventListener('click', () => {
@@ -140,11 +143,12 @@ class Gui {
       link.click();
     });
     div.appendChild(button);
-    this.static_zone.appendChild(div);
+    this.file_zone.appendChild(div);
   }
 
   createEffectSelector() {
     const div = document.createElement('div');
+    div.setAttribute('class', 'effect-selector');
     const form = document.createElement('form');
     const selector = document.createElement('select');
     selector.setAttribute('id', 'fx_selector');
@@ -174,6 +178,17 @@ class Gui {
     const div = document.createElement('div');
     div.setAttribute('class', 'effect-editor');
     Gui.addLabel(div, fx.constructor.name);
+
+    const delete_button = document.createElement('button');
+    delete_button.setAttribute('class', 'delete_button');
+    delete_button.innerHTML = 'X'
+    delete_button.addEventListener('click', (event) => {
+      this.fx_chain.removeEffect(fx);
+      this.dynamic_zone.removeChild(div);
+      this.updated = true;
+    });
+    div.appendChild(delete_button);
+
     Gui.newLine(div);
 
     const callback = (event) => {
@@ -227,15 +242,6 @@ class Gui {
       }
       div.appendChild(param_div);
     }
-
-    const delete_button = document.createElement('button');
-    delete_button.innerHTML = 'X'
-    delete_button.addEventListener('click', (event) => {
-      this.fx_chain.removeEffect(fx);
-      this.dynamic_zone.removeChild(div);
-      this.updated = true;
-    });
-    div.appendChild(delete_button);
 
     this.dynamic_zone.appendChild(div);
   }
