@@ -17,15 +17,20 @@ class Noise extends Effect {
 
   constructor() {
     super();
-    this.noiseFactor = [0.5, 0.5, 0.5];
+    this.noise_factor = {
+      red: 0.5,
+      green: 0.5,
+      blue: 0.5
+    };
   }
 
   setParams(params) {
-    if ('noiseFactor' in params) this.noiseFactor = params['noiseFactor'];
+    if ('noise_factor' in params) this.noise_factor = params['noise_factor'];
   }
 
   apply(texture) {
-    return Noise.fx_function(texture, this.noiseFactor);
+    let factor = [this.noise_factor.red, this.noise_factor.green, this.noise_factor.blue];
+    return Noise.fx_function(texture, factor);
   }
 }
 

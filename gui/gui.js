@@ -3,6 +3,48 @@ import { EffectsChain } from "../effects/effects_chain.js";
 
 
 class Gui {
+  static createSubmitButton(callback) {
+    const button = document.createElement('button');
+    button.type = 'submit';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      return callback(event);
+    });
+    return button;
+  }
+
+  static createSlider(min, max, callback) {
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = min;
+    slider.max = max;
+    slider.addEventListener('change', callback);
+    return slider;
+  }
+
+  static createCheckbox(callback) {
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = false;
+    checkbox.checked = false;
+    checkbox.addEventListener('change', (event) => {
+      checkbox.value = checkbox.checked;
+      return callback(event)
+    });
+    return checkbox;
+  }
+
+  static newLine(parent) {
+    parent.appendChild(document.createElement('br'));
+  }
+
+  static addLabel(parent, label) {
+    let s = label.replace('_', ' ').toUpperCase();
+    const l = document.createElement('label');
+    l.innerHTML = s;
+    parent.appendChild(l);
+  }
+
   constructor(regl, fx_chain) {
     this.fx_chain = fx_chain;
     this.static_zone = document.getElementById('gui_static');
@@ -22,37 +64,6 @@ class Gui {
     this.createEffectSelector();
   }
 
-  createSubmitButton(callback) {
-    const button = document.createElement('button');
-    button.type = 'submit';
-    button.addEventListener('click', (event) => {
-      event.preventDefault();
-      return callback(event);
-    });
-    return button;
-  }
-
-  createSlider(min, max, callback) {
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = min;
-    slider.max = max;
-    slider.addEventListener('change', callback);
-    return slider;
-  }
-
-  createCheckbox(callback) {
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.value = false;
-    checkbox.checked = false;
-    checkbox.addEventListener('change', (event) => {
-      checkbox.value = checkbox.checked;
-      return callback(event)
-    });
-    return checkbox;
-  }
-
   createImageUploader(regl) {
     const div = document.createElement('div');
     const form = document.createElement('form');
@@ -63,7 +74,7 @@ class Gui {
     file_input.accept = 'image/*';
     file_input.hidden = true;
 
-    const button = this.createSubmitButton((_) => {
+    const button = Gui.createSubmitButton((_) => {
       if (!file_input.value.length) return;
 
       let reader = new FileReader();
@@ -146,7 +157,7 @@ class Gui {
     }
     form.appendChild(selector);
 
-    const button = this.createSubmitButton((_) => {
+    const button = Gui.createSubmitButton((_) => {
       if (!this.image_loaded) return;
       const fx = this.fx_chain.addEffect(fx_selector.value);
       this.createEffectEditor(fx);
@@ -161,9 +172,9 @@ class Gui {
 
   createEffectEditor(fx) {
     const div = document.createElement('div');
-    const label = document.createElement('label');
-    label.innerHTML = fx.constructor.name;
-    div.appendChild(label);
+    div.setAttribute('class', 'effect-editor');
+    Gui.addLabel(div, fx.constructor.name);
+    Gui.newLine(div);
 
     const callback = (event) => {
       event.preventDefault();
@@ -172,11 +183,11 @@ class Gui {
 
       const params = {};
       inputs.forEach(input => {
-        const [key, type] = input.id.split('#');
+        const [key, type, subkey] = input.id.split('#');
 
         if (type.startsWith('multi')) {
-          let multi = tryGetValue(params, key, []);
-          multi.push(input.value / 100.0);
+          let multi = tryGetValue(params, key, {});
+          multi[subkey] = input.value / 100.0;
         } else {
           params[key] = input.value;
         }
@@ -191,24 +202,28 @@ class Gui {
       const param = fx_params[key];
 
       const param_div = document.createElement('div');
-      const param_label = document.createElement('label');
-      param_label.innerHTML = key;
-      param_div.appendChild(param_label);
+      param_div.setAttribute('class', 'param_editor');
+      Gui.addLabel(param_div, key);
+
       // Array of numbers assumed to be values from 0 to 1
-      if (Array.isArray(param.value) && typeof param.value[0] === 'number') {
-        param.value.forEach((v, i) => {
-          const slider = this.createSlider(0, 100, callback);
-          slider.id = `${key}#multi${i}`
+      if (typeof param.value === 'object') {
+        for (const slider_key in param.value) {
+          Gui.newLine(param_div);
+          const v = param.value[slider_key];
+          const slider = Gui.createSlider(0, 100, callback);
+          slider.id = `${key}#multi#${slider_key}`
           slider.value = v * 100;
+          Gui.addLabel(param_div, slider_key);
           param_div.appendChild(slider);
-        });
+        }
       }
 
       // Single number assumed to be a flag
       else if (typeof param.value === 'number') {
-        const checkbox = this.createCheckbox(callback);
+        const checkbox = Gui.createCheckbox(callback);
         checkbox.id = `${key}#single`;
         param_div.appendChild(checkbox);
+        Gui.newLine(param_div);
       }
       div.appendChild(param_div);
     }

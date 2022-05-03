@@ -18,7 +18,11 @@ class Filter extends Effect {
 
   constructor() {
     super();
-    this.threshold = [0.5, 0.5, 0.5];
+    this.threshold = {
+      red: 0.5,
+      green: 0.5,
+      blue: 0.5
+    };
     this.high_low = 1.0;
   }
 
@@ -28,7 +32,8 @@ class Filter extends Effect {
   }
 
   apply(texture) {
-    return Filter.fx_function(texture, this.threshold, this.high_low)
+    let t = [this.threshold.red, this.threshold.green, this.threshold.blue];
+    return Filter.fx_function(texture, t, this.high_low)
   }
 }
 

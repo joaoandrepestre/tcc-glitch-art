@@ -1,0 +1,36 @@
+body {
+  background-color: rgb(55, 69, 80);
+}
+
+.display {
+  float: left;
+}
+
+.editor {
+  float: left;
+  width: 300pt;
+  background-color: rgb(109, 131, 151);
+  margin-left: 10pt;
+  border-radius: 1pt;
+}
+
+.effect-editor {
+  max-width: 200pt;
+  background-color: rgb(50, 75, 99);
+  margin: 5pt 0 5pt 5pt;
+  border-radius: 5pt;
+  position: relative;
+  color: white;
+  font-family: sans-serif;
+}
+
+.effect-editor label {
+  margin-left: 3pt;
+}
+
+.param_editor {
+  max-width: 195pt;
+  background-color: rgb(25, 48, 71);
+  margin: 2pt;
+  border-radius: 7pt;
+}
