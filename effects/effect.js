@@ -4,7 +4,7 @@ class Effect {
   // basic regl config for displaying an image, used by all effects
   static basicConfig = {
     attributes: {
-      position: [[-2, -4], [-2, 4], [4, 0]]
+      position: [[-2, -4], [-4, -2], [-4, 2], [-3, 3], [-2, 4], [2, 4], [3, 3], [4, 2], [4, -2], [-2, -4]]
     },
 
     depth: { enable: false },
@@ -13,7 +13,8 @@ class Effect {
       texture: (_, props) => props.texture,
     },
 
-    count: 3
+    count: 10,
+    primitive: 'triangle fan'
   };
 
   constructor(id) {

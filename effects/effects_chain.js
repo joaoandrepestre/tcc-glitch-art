@@ -2,6 +2,7 @@ import { Effect } from "./effect.js";
 import { Noise } from "./noise.js";
 import { Filter } from "./filter.js";
 import { Mapper } from "./mapper.js";
+import { Wobble } from "./wobble.js";
 
 // Chain of effects to be applied in order
 class EffectsChain {
@@ -12,6 +13,7 @@ class EffectsChain {
     EffectsChain.fx_reg['noise'] = Noise;
     EffectsChain.fx_reg['filter'] = Filter;
     EffectsChain.fx_reg['mapper'] = Mapper;
+    EffectsChain.fx_reg['wobble'] = Wobble;
 
     this.regl = regl;
     this.fx_chain = [];
@@ -90,6 +92,7 @@ class EffectsChain {
       vert
     };
 
+    console.log(config);
     this.regl_command = this.regl(config);
   }
 
