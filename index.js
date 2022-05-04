@@ -10,8 +10,6 @@ window.onload = async () => {
   const gui = new Gui(regl, fx);
 
   regl.frame(() => {
-    if (gui.updated) {
-      gui.update();
-    }
+    gui.update(regl);
   });
 };

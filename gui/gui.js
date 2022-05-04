@@ -77,11 +77,13 @@ class Gui {
     this.canvas = document.getElementById('canvas');
     this.initStaticZone(regl);
     this.dynamic_zone = document.getElementById('gui_dynamic');
+
+    this.src_video = null;
     this.texture = null;
     this.out_texture = null;
 
-    this.updated = false;
     this.image_loaded = false;
+    this.video_loaded = false;
   }
 
   initStaticZone(regl) {
@@ -98,7 +100,7 @@ class Gui {
     const file_input = document.createElement('input');
     file_input.id = 'file_input';
     file_input.type = 'file';
-    file_input.accept = 'image/*';
+    file_input.accept = 'image/*, video/*';
     file_input.hidden = true;
 
     const button = Gui.createSubmitButton((_) => {
@@ -109,10 +111,10 @@ class Gui {
       let file = file_input.files[0];
       reader.onload = (event) => {
         let str = event.target.result;
-        let src_image = new Image();
-        src_image.onload = (e) => {
-          let w = e.target.width;
-          let h = e.target.height;
+        let src = null;
+        let onload = (e) => {
+          let w = e.target.width || e.target.videoWidth;
+          let h = e.target.height || e.target.videoHeight;
           const maxW = window.innerWidth;
           const maxH = window.innerHeight;
 
@@ -128,14 +130,34 @@ class Gui {
           //  }
           //}
 
-          this.texture = regl.texture({ data: src_image, flipY: true });
-          //this.texture.resize(w, h);
+          this.texture = regl.texture({ data: src, flipY: true });
           this.canvas.width = w;
           this.canvas.height = h;
-          this.image_loaded = true;
-          this.updated = true;
+          this.image_loaded = false;
+          this.video_loaded = false;
         };
-        src_image.src = str;
+
+        if (file.type.startsWith('video')) {
+          src = document.createElement('video');
+          src.muted = true;
+          src.loop = true;
+          src.src = str;
+          src.onloadeddata = (e) => {
+            onload(e);
+            src.play();
+            this.src_video = src;
+            this.video_loaded = true;
+          };
+          src.load();
+        } else {
+          src = new Image();
+          src.onload = (e) => {
+            onload(e);
+            this.image_loaded = true;
+          };
+          src.src = str;
+        }
+
       };
 
       reader.readAsDataURL(file);
@@ -159,7 +181,7 @@ class Gui {
     const div = document.createElement('div');
     div.setAttribute('class', 'image-downloader');
     const button = document.createElement('button');
-    button.innerHTML = 'Save...';
+    button.innerHTML = 'Save as Image...';
     button.addEventListener('click', () => {
       if (!this.image_loaded || !this.fx_chain.modified()) return;
       let link = document.createElement('a');
@@ -180,10 +202,9 @@ class Gui {
     form.appendChild(selector);
 
     const button = Gui.createSubmitButton((_) => {
-      if (!this.image_loaded) return;
+      if (!this.srcLoaded()) return;
       const fx = this.fx_chain.addEffect(fx_selector.value);
       this.createEffectEditor(fx);
-      this.updated = true;
     });
     button.innerHTML = 'Add Effect';
     form.appendChild(button);
@@ -206,7 +227,6 @@ class Gui {
     delete_button.addEventListener('click', (event) => {
       this.fx_chain.removeEffect(fx);
       this.dynamic_zone.removeChild(div);
-      this.updated = true;
     });
     div.appendChild(delete_button);
 
@@ -231,7 +251,6 @@ class Gui {
       });
 
       fx.setParams(params);
-      this.updated = true;
     };
 
     // param editors
@@ -280,9 +299,17 @@ class Gui {
     this.dynamic_zone.appendChild(div);
   }
 
-  update() {
-    this.out_texture = this.fx_chain.apply(this.texture);
-    this.updated = false;
+  srcLoaded() {
+    return this.image_loaded || this.video_loaded;
+  }
+
+  update(regl) {
+    if (this.srcLoaded()) {
+      if (this.video_loaded) {
+        this.texture = regl.texture({ data: this.src_video, flipY: true });
+      }
+      this.out_texture = this.fx_chain.apply(this.texture);
+    }
   }
 }
 
