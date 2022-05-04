@@ -59,6 +59,17 @@ class Gui {
     parent.appendChild(l);
   }
 
+  static updateEffectEditorLabels(paramId, newLabels) {
+    let param = document.getElementById(paramId);
+    let paramLabel = paramId.replace('_', ' ').toUpperCase();
+    let labels = param.querySelectorAll('label');
+    Object.values(labels)
+      .filter(l => l.innerHTML !== paramLabel)
+      .forEach((l, i) => {
+        l.innerHTML = newLabels[i];
+      });
+  }
+
   constructor(regl, fx_chain) {
     this.fx_chain = fx_chain;
     this.static_zone = document.getElementById('gui_static');
@@ -230,6 +241,7 @@ class Gui {
 
       // background div
       const param_div = document.createElement('div');
+      param_div.id = key;
       param_div.setAttribute('class', 'param_editor');
       Gui.addLabel(param_div, key);
 

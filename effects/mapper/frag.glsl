@@ -31,7 +31,7 @@ void main () {
     other = vec3(H, S, V);
   } 
 
-  vec3 color = colorRatio * rgb + (vec3(1) - colorRatio) * other;
+  vec3 color = colorRatio * other + (vec3(1) - colorRatio) * rgb;
 
   gl_FragColor = vec4(color, 1.0);
 }
