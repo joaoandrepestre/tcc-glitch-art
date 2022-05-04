@@ -78,16 +78,19 @@ class Gui {
     this.initStaticZone(regl);
     this.dynamic_zone = document.getElementById('gui_dynamic');
 
+    this.src_webcam = null;
     this.src_video = null;
     this.texture = null;
     this.out_texture = null;
 
     this.image_loaded = false;
     this.video_loaded = false;
+    this.webcam_loaded = false;
   }
 
   initStaticZone(regl) {
     this.createImageUploader(regl);
+    this.createWebcamSelector(regl);
     this.createImageDownloader();
     this.createEffectSelector();
   }
@@ -135,6 +138,9 @@ class Gui {
           this.canvas.height = h;
           this.image_loaded = false;
           this.video_loaded = false;
+          this.webcam_loaded = false;
+          this.src_webcam.getTracks()[0].stop();
+          this.src_video = null;
         };
 
         if (file.type.startsWith('video')) {
@@ -158,6 +164,7 @@ class Gui {
           src.src = str;
         }
 
+        file_input.value = null;
       };
 
       reader.readAsDataURL(file);
@@ -170,10 +177,45 @@ class Gui {
     div.appendChild(form);
 
     const main_button = document.createElement('button');
-    main_button.innerHTML = 'Open...'
+    main_button.innerHTML = 'Open File...'
     main_button.addEventListener('click', () => file_input.click());
     div.appendChild(main_button);
 
+    this.file_zone.appendChild(div);
+  }
+
+  createWebcamSelector(regl) {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'webcam-button');
+    const button = document.createElement('button');
+    button.innerHTML = 'Open Webcam';
+    button.addEventListener('click', () => {
+      if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            this.src_webcam = stream;
+            let src = document.createElement('video');
+            src.muted = true;
+            src.srcObject = stream;
+            src.onloadeddata = (e) => {
+              let w = e.target.width || e.target.videoWidth;
+              let h = e.target.height || e.target.videoHeight;
+
+              this.texture = regl.texture({ data: src, flipY: true });
+              this.canvas.width = w;
+              this.canvas.height = h;
+              this.image_loaded = false;
+              this.video_loaded = false;
+              src.play();
+              this.src_video = src;
+              this.webcam_loaded = true;
+            };
+            src.load();
+          })
+          .catch(err => console.log(err));
+      }
+    });
+    div.appendChild(button);
     this.file_zone.appendChild(div);
   }
 
@@ -183,7 +225,7 @@ class Gui {
     const button = document.createElement('button');
     button.innerHTML = 'Save as Image...';
     button.addEventListener('click', () => {
-      if (!this.image_loaded || !this.fx_chain.modified()) return;
+      if (!this.srcLoaded() || !this.fx_chain.modified()) return;
       let link = document.createElement('a');
       link.download = 'output_image.png';
       link.href = document.getElementById('canvas').toDataURL('image/png');
@@ -300,12 +342,12 @@ class Gui {
   }
 
   srcLoaded() {
-    return this.image_loaded || this.video_loaded;
+    return this.image_loaded || this.video_loaded || this.webcam_loaded;
   }
 
   update(regl) {
     if (this.srcLoaded()) {
-      if (this.video_loaded) {
+      if (this.video_loaded || this.webcam_loaded) {
         this.texture = regl.texture({ data: this.src_video, flipY: true });
       }
       this.out_texture = this.fx_chain.apply(this.texture);
