@@ -74,6 +74,11 @@ body {
   border-radius: 7pt;
 }
 
+.param_editor select {
+  background-color: rgb(25, 48, 71);
+  color: white;
+}
+
 .delete_button {
   border-radius: 50%;
   text-align: center;

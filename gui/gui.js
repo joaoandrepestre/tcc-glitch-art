@@ -34,6 +34,20 @@ class Gui {
     return checkbox;
   }
 
+  static createSelector(options, ignore = '', callback = () => { }) {
+    const selector = document.createElement('select');
+    for (const i in options) {
+      const option = options[i];
+      if (option === ignore) continue;
+      const opt = document.createElement('option');
+      opt.value = option;
+      opt.innerHTML = option;
+      selector.appendChild(opt);
+    }
+    selector.addEventListener('change', callback);
+    return selector;
+  }
+
   static newLine(parent) {
     parent.appendChild(document.createElement('br'));
   }
@@ -150,15 +164,8 @@ class Gui {
     const div = document.createElement('div');
     div.setAttribute('class', 'effect-selector');
     const form = document.createElement('form');
-    const selector = document.createElement('select');
+    const selector = Gui.createSelector(Object.keys(EffectsChain.fx_reg), 'identity');
     selector.setAttribute('id', 'fx_selector');
-    for (const key in EffectsChain.fx_reg) {
-      if (key === 'identity') continue;
-      const opt = document.createElement('option');
-      opt.setAttribute('value', key);
-      opt.innerHTML = key;
-      selector.appendChild(opt);
-    }
     form.appendChild(selector);
 
     const button = Gui.createSubmitButton((_) => {
@@ -175,10 +182,13 @@ class Gui {
   }
 
   createEffectEditor(fx) {
+
+    // background div
     const div = document.createElement('div');
     div.setAttribute('class', 'effect-editor');
     Gui.addLabel(div, fx.constructor.name);
 
+    // delete button
     const delete_button = document.createElement('button');
     delete_button.setAttribute('class', 'delete_button');
     delete_button.innerHTML = 'X'
@@ -191,10 +201,11 @@ class Gui {
 
     Gui.newLine(div);
 
+    // callback for any change in the params
     const callback = (event) => {
       event.preventDefault();
 
-      const inputs = div.querySelectorAll('input');
+      const inputs = div.querySelectorAll('input, select');
 
       const params = {};
       inputs.forEach(input => {
@@ -212,24 +223,35 @@ class Gui {
       this.updated = true;
     };
 
+    // param editors
     const fx_params = Object.getOwnPropertyDescriptors(fx);
     for (const key in fx_params) {
       const param = fx_params[key];
 
+      // background div
       const param_div = document.createElement('div');
       param_div.setAttribute('class', 'param_editor');
       Gui.addLabel(param_div, key);
 
-      // Array of numbers assumed to be values from 0 to 1
+      // multi type parameters, not simple numbers
       if (typeof param.value === 'object') {
-        for (const slider_key in param.value) {
-          Gui.newLine(param_div);
-          const v = param.value[slider_key];
-          const slider = Gui.createSlider(0, 100, callback);
-          slider.id = `${key}#multi#${slider_key}`
-          slider.value = v * 100;
-          Gui.addLabel(param_div, slider_key);
-          param_div.appendChild(slider);
+        // multiple choice - select
+        if ('options' in param.value) {
+          const selector = Gui.createSelector(param.value['options'], '', callback);
+          selector.id = `${key}#single`
+          param_div.appendChild(selector);
+        }
+        else {
+          // sliders for multi numbers
+          for (const slider_key in param.value) {
+            Gui.newLine(param_div);
+            const v = param.value[slider_key];
+            const slider = Gui.createSlider(0, 100, callback);
+            slider.id = `${key}#multi#${slider_key}`
+            slider.value = v * 100;
+            Gui.addLabel(param_div, slider_key);
+            param_div.appendChild(slider);
+          }
         }
       }
 
