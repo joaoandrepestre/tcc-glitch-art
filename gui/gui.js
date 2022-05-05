@@ -139,7 +139,8 @@ class Gui {
           this.image_loaded = false;
           this.video_loaded = false;
           this.webcam_loaded = false;
-          this.src_webcam.getTracks()[0].stop();
+          if (this.src_webcam != null)
+            this.src_webcam.getTracks()[0].stop();
           this.src_video = null;
         };
 
