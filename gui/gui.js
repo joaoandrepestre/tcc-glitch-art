@@ -34,11 +34,10 @@ class Gui {
     return checkbox;
   }
 
-  static createSelector(options, ignore = '', callback = () => { }) {
+  static createSelector(options, callback = () => { }) {
     const selector = document.createElement('select');
     for (const i in options) {
       const option = options[i];
-      if (option === ignore) continue;
       const opt = document.createElement('option');
       opt.value = option;
       opt.innerHTML = option;
@@ -81,7 +80,6 @@ class Gui {
     this.src_webcam = null;
     this.src_video = null;
     this.texture = null;
-    this.out_texture = null;
 
     this.image_loaded = false;
     this.video_loaded = false;
@@ -240,7 +238,7 @@ class Gui {
     const div = document.createElement('div');
     div.setAttribute('class', 'effect-selector');
     const form = document.createElement('form');
-    const selector = Gui.createSelector(Object.keys(EffectsChain.fx_reg), 'identity');
+    const selector = Gui.createSelector(Object.keys(EffectsChain.fx_reg));
     selector.setAttribute('id', 'fx_selector');
     form.appendChild(selector);
 
@@ -299,6 +297,8 @@ class Gui {
     // param editors
     const fx_params = Object.getOwnPropertyDescriptors(fx);
     for (const key in fx_params) {
+      if (key === 'config' || key === 'id') continue;
+
       const param = fx_params[key];
 
       // background div
@@ -311,7 +311,7 @@ class Gui {
       if (typeof param.value === 'object') {
         // multiple choice - select
         if ('options' in param.value) {
-          const selector = Gui.createSelector(param.value['options'], '', callback);
+          const selector = Gui.createSelector(param.value['options'], callback);
           selector.id = `${key}#single`
           param_div.appendChild(selector);
         }
@@ -351,7 +351,7 @@ class Gui {
       if (this.video_loaded || this.webcam_loaded) {
         this.texture = regl.texture({ data: this.src_video, flipY: true });
       }
-      this.out_texture = this.fx_chain.apply(this.texture);
+      this.fx_chain.apply(this.texture);
     }
   }
 }
