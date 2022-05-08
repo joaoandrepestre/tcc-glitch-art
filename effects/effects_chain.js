@@ -100,7 +100,7 @@ class EffectsChain {
   }
 
   modified() {
-    return this.fx_chain.length > 1;
+    return this.fx_chain.length > 0;
   }
 
   // Adds a new instance of the chosen effect
