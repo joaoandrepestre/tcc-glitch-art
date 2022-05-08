@@ -8,10 +8,5 @@ window.onload = async () => {
   const fx = new EffectsChain(regl);
   const gui = new Gui(regl, fx);
 
-  let i = 0;
-  regl.frame(() => {
-    i = (i + 1) % 3;
-    if (i) return;
-    gui.update(regl);
-  });
+  gui.update();
 };

@@ -35,8 +35,13 @@ body {
   width: 100pt;
 }
 
+.framerate {
+  float: right;
+  color: white;
+}
+
 .effect-selector {
-  width: 100pt;
+  width: 120pt;
 }
 
 .effect-selector select {

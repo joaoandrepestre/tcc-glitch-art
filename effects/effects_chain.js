@@ -94,7 +94,6 @@ class EffectsChain {
       vert
     };
 
-    console.log(config);
     this.regl_command = this.regl(config);
   }
 

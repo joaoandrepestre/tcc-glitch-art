@@ -71,11 +71,13 @@ class Gui {
   }
 
   constructor(regl, fx_chain) {
+    this.regl = regl;
+
     this.fx_chain = fx_chain;
     this.static_zone = document.getElementById('gui_static');
     this.file_zone = document.getElementById('file_zone');
     this.canvas = document.getElementById('canvas');
-    this.initStaticZone(regl);
+    this.initStaticZone();
     this.dynamic_zone = document.getElementById('gui_dynamic');
 
     this.src_webcam = null;
@@ -85,16 +87,24 @@ class Gui {
     this.image_loaded = false;
     this.video_loaded = false;
     this.webcam_loaded = false;
+
+    this.framerate = 30;
   }
 
-  initStaticZone(regl) {
-    this.createImageUploader(regl);
-    this.createWebcamSelector(regl);
+  defineTexture(source) {
+    if (this.texture !== null) this.texture.destroy();
+    this.texture = this.regl.texture({ data: source, flipY: true });
+  }
+
+  initStaticZone() {
+    this.createImageUploader();
+    this.createWebcamSelector();
+    //this.createFramerateSlider();
     this.createImageDownloader();
     this.createEffectSelector();
   }
 
-  createImageUploader(regl) {
+  createImageUploader() {
     const div = document.createElement('div');
     div.setAttribute('class', 'image-uploader');
     const form = document.createElement('form');
@@ -132,7 +142,7 @@ class Gui {
           //  }
           //}
 
-          this.texture = regl.texture({ data: src, flipY: true });
+          this.defineTexture(src);
           this.canvas.width = w;
           this.canvas.height = h;
           this.image_loaded = false;
@@ -184,7 +194,7 @@ class Gui {
     this.file_zone.appendChild(div);
   }
 
-  createWebcamSelector(regl) {
+  createWebcamSelector() {
     const div = document.createElement('div');
     div.setAttribute('class', 'webcam-button');
     const button = document.createElement('button');
@@ -201,7 +211,7 @@ class Gui {
               let w = e.target.width || e.target.videoWidth;
               let h = e.target.height || e.target.videoHeight;
 
-              this.texture = regl.texture({ data: src, flipY: true });
+              this.defineTexture(src);
               this.canvas.width = w;
               this.canvas.height = h;
               this.image_loaded = false;
@@ -233,6 +243,19 @@ class Gui {
     });
     div.appendChild(button);
     this.file_zone.appendChild(div);
+  }
+
+  createFramerateSlider() {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'framerate')
+    Gui.addLabel(div, 'framerate');
+    const slider = Gui.createSlider(1, 60, () => {
+      this.framerate = slider.value;
+    });
+    slider.value = this.framerate;
+    div.appendChild(slider);
+
+    this.static_zone.appendChild(div);
   }
 
   createEffectSelector() {
@@ -348,13 +371,20 @@ class Gui {
     return this.image_loaded || this.video_loaded || this.webcam_loaded;
   }
 
-  update(regl) {
-    if (this.srcLoaded()) {
-      if (this.video_loaded || this.webcam_loaded) {
-        this.texture = regl.texture({ data: this.src_video, flipY: true });
+  update() {
+    let i = 0;
+    this.regl.frame(() => {
+      let divider = 60 / this.framerate;
+      i = Math.trunc((i + 1) % divider);
+      if (i) return;
+
+      if (this.srcLoaded()) {
+        if (this.video_loaded || this.webcam_loaded) {
+          this.defineTexture(this.src_video);
+        }
+        this.fx_chain.apply(this.texture);
       }
-      this.fx_chain.apply(this.texture);
-    }
+    });
   }
 }
 
