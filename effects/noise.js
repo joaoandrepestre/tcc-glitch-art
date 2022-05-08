@@ -17,10 +17,9 @@ class Noise extends Effect {
       frag_shader: {
         vars: `
         uniform vec3 noiseFactor${this.id};
-        uniform float time${this.id};
         `,
         main: `
-        float random${this.id} = fract(sin(dot(uv + time${this.id}, vec2(12.9898,78.233)))*43758.5453123);
+        float random${this.id} = fract(sin(dot(uv + time, vec2(12.9898,78.233)))*43758.5453123);
         vec3 bounds${this.id} = noiseFactor${this.id} * color;
         vec3 noise${this.id} = 2.0 * bounds${this.id} * vec3(random${this.id}) - bounds${this.id};
         color += noise${this.id};
@@ -28,7 +27,6 @@ class Noise extends Effect {
       }
     };
     this.config.uniforms[`noiseFactor${this.id}`] = (_, props) => props[`noiseFactor${this.id}`];
-    this.config.uniforms[`time${this.id}`] = ctx => ctx.time;
   }
 
   setParams(params) {

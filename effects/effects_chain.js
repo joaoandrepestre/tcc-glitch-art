@@ -25,6 +25,7 @@ class EffectsChain {
     return `
       precision mediump float;
       uniform sampler2D texture;
+      uniform float time;
       varying vec2 uv;
       ${partialShaderCode.vars}
 
@@ -40,6 +41,7 @@ class EffectsChain {
     return `
       precision mediump float;
       attribute vec2 position;
+      uniform float time;
       varying vec2 uv;
       ${partialShaderCode.vars}
 

@@ -11,6 +11,7 @@ class Effect {
 
     uniforms: {
       texture: (_, props) => props.texture,
+      time: ctx => ctx.time,
     },
 
     count: 10,
