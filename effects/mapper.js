@@ -76,7 +76,7 @@ class Mapper extends Effect {
         this.ratio['value'] = r[2];
       }
       let newLabels = Object.keys(this.ratio).map(key => key.replace('_', ' ').toUpperCase());
-      Gui.updateEffectEditorLabels('ratio', newLabels);
+      Gui.updateEffectEditorLabels(this.id, 'ratio', newLabels);
     }
   }
 

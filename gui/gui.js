@@ -58,8 +58,9 @@ class Gui {
     parent.appendChild(l);
   }
 
-  static updateEffectEditorLabels(paramId, newLabels) {
-    let param = document.getElementById(paramId);
+  static updateEffectEditorLabels(effectId, paramId, newLabels) {
+    let effectDiv = document.getElementById(effectId);
+    let param = effectDiv.querySelector(`#${paramId}`);
     let paramLabel = paramId.replace('_', ' ').toUpperCase();
     let labels = param.querySelectorAll('label');
     Object.values(labels)
@@ -258,6 +259,7 @@ class Gui {
 
     // background div
     const div = document.createElement('div');
+    div.id = fx.id;
     div.setAttribute('class', 'effect-editor');
     Gui.addLabel(div, fx.constructor.name);
 
