@@ -70,6 +70,30 @@ class Gui {
       });
   }
 
+  static resize(width, height) {
+    let w = width;
+    let h = height;
+    const maxW = window.innerWidth;
+    const maxH = window.innerHeight;
+
+    if (w > h) {
+      if (w > maxW) {
+        h = h * (maxW / w);
+        w = maxW;
+      }
+    } else {
+      if (h > maxH) {
+        w = w * (maxH / h);
+        h = maxH;
+      }
+    }
+
+    return {
+      width: w,
+      height: h
+    };
+  }
+
   constructor(regl, fx_chain) {
     this.regl = regl;
 
@@ -127,24 +151,11 @@ class Gui {
         let onload = (e) => {
           let w = e.target.width || e.target.videoWidth;
           let h = e.target.height || e.target.videoHeight;
-          const maxW = window.innerWidth;
-          const maxH = window.innerHeight;
-
-          //if (w > h) {
-          //  if (w > maxW) {
-          //    h = h * (maxW / w);
-          //    w = maxW;
-          //  }
-          //} else {
-          //  if (h > maxH) {
-          //    w = w * (maxH / h);
-          //    h = maxH;
-          //  }
-          //}
+          let dim = Gui.resize(w, h);
 
           this.defineTexture(src);
-          this.canvas.width = w;
-          this.canvas.height = h;
+          this.canvas.width = dim.width;
+          this.canvas.height = dim.height;
           this.image_loaded = false;
           this.video_loaded = false;
           this.webcam_loaded = false;
@@ -210,10 +221,11 @@ class Gui {
             src.onloadeddata = (e) => {
               let w = e.target.width || e.target.videoWidth;
               let h = e.target.height || e.target.videoHeight;
+              let dim = Gui.resize(w, h);
 
               this.defineTexture(src);
-              this.canvas.width = w;
-              this.canvas.height = h;
+              this.canvas.width = dim.width;
+              this.canvas.height = dim.height;
               this.image_loaded = false;
               this.video_loaded = false;
               src.play();
