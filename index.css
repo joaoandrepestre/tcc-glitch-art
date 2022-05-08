@@ -12,6 +12,7 @@ body {
   margin-top: 0;
   margin-bottom: 5pt;
   border-radius: 3pt;
+  min-height: 60pt;
 }
 
 .file-zone {
@@ -40,7 +41,12 @@ body {
   color: white;
 }
 
+.sync {
+  float: left;
+}
+
 .effect-selector {
+  float: left;
   width: 120pt;
 }
 

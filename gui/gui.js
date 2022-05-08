@@ -87,7 +87,11 @@ class Gui {
     this.createProjectUploader();
     this.createProjectDownloader();
     this.createImageDownloader();
+
+    Gui.newLine(this.static_zone);
+
     this.createEffectSelector();
+    this.createSyncButton();
   }
 
   resize(dimensions) {
@@ -285,6 +289,25 @@ class Gui {
     });
     div.appendChild(button);
     this.file_zone.appendChild(div);
+  }
+
+  createSyncButton() {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'sync');
+    const button = document.createElement('button');
+    button.innerHTML = 'Sync to music...';
+    button.addEventListener('click', () => {
+      if (navigator.mediaDevices.getUserMedia && navigator.mediaDevices.enumerateDevices) {
+        navigator.mediaDevices.enumerateDevices()
+          .then(res => {
+            let devices = res.filter(d => d.kind === 'audioinput');
+            console.log(devices);
+          })
+          .catch(err => console.log(err));
+      }
+    });
+    div.appendChild(button);
+    this.static_zone.appendChild(div);
   }
 
   createFramerateSlider() {
