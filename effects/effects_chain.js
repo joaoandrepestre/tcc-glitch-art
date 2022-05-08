@@ -30,9 +30,11 @@ class EffectsChain {
       ${partialShaderCode.vars}
 
       void main() {
-        vec3 color = vec3(texture2D(texture, uv));
+        vec4 sample = texture2D(texture, uv);
+        vec3 color = vec3(sample);
+        float alpha = sample.w;
         ${partialShaderCode.main}
-        gl_FragColor = vec4(color, 1.0);
+        gl_FragColor = vec4(color, alpha);
       }
     `;
   }

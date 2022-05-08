@@ -390,6 +390,10 @@ class Gui {
       i = Math.trunc((i + 1) % divider);
       if (i) return;
 
+      this.regl.clear({
+        color: [0.21, 0.27, 0.31, 1]
+      });
+
       if (this.srcLoaded()) {
         if (this.video_loaded || this.webcam_loaded) {
           this.defineTexture(this.src_video);
