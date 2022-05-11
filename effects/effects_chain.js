@@ -58,23 +58,18 @@ class EffectsChain {
 
   defineReglCommand() {
     let config_part = this.fx_chain
-      .map(fx => fx.config)
-      .reduce((accConfig, config) => {
-        if (config === undefined) return accConfig;
+      .reduce((accConfig, fx) => {
 
         accConfig.uniforms = {
           ...accConfig.uniforms,
-          ...config.uniforms
+          ...fx.config.uniforms
         };
-        if (config.frag_shader !== undefined) {
-          accConfig.frag_shader.vars += config.frag_shader.vars;
-          accConfig.frag_shader.main += config.frag_shader.main;
-        }
 
-        if (config.vert_shader !== undefined) {
-          accConfig.vert_shader.vars += config.vert_shader.vars;
-          accConfig.vert_shader.main += config.vert_shader.main;
-        }
+        accConfig.frag_shader.vars += fx.getFragShaderVars();
+        accConfig.frag_shader.main += fx.getFragShaderMain();
+
+        accConfig.vert_shader.vars += fx.getVertShaderVars();
+        accConfig.vert_shader.main += fx.getVertShaderMain();
 
         return accConfig;
       }, {

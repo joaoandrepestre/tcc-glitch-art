@@ -1,9 +1,9 @@
-import { Effect } from "./effect.js";
+import { FragEffect } from "./effect.js";
 
 // Noise effect, applies some white noise to the image
 // parameters: 
 //  - noiseFactor: factor from 0 to 1 of the intensity of the noise for each color component
-class Noise extends Effect {
+class Noise extends FragEffect {
   constructor(id) {
     super(id);
     this.noise_factor = {
@@ -12,21 +12,13 @@ class Noise extends Effect {
       blue: 0.5
     };
 
-    this.config = {
-      uniforms: {},
-      frag_shader: {
-        vars: `
-        uniform vec3 noiseFactor${this.id};
-        `,
-        main: `
-        float random${this.id} = fract(sin(dot(uv + time, vec2(12.9898,78.233)))*43758.5453123);
-        vec3 bounds${this.id} = noiseFactor${this.id} * color;
-        vec3 noise${this.id} = 2.0 * bounds${this.id} * vec3(random${this.id}) - bounds${this.id};
-        color += noise${this.id};
-        `
-      }
-    };
     this.config.uniforms[`noiseFactor${this.id}`] = (_, props) => props[`noiseFactor${this.id}`];
+    this.config.frag_partial = `
+    float random${this.id} = fract(sin(dot(uv + time, vec2(12.9898,78.233)))*43758.5453123);
+    vec3 bounds${this.id} = noiseFactor${this.id} * color;
+    vec3 noise${this.id} = 2.0 * bounds${this.id} * vec3(random${this.id}) - bounds${this.id};
+    color += noise${this.id};
+    `;
   }
 
   setParams(params) {

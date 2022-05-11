@@ -20,6 +20,63 @@ class Effect {
 
   constructor(id) {
     this.id = id;
+    this.config = {
+      uniforms: {},
+      frag_partial: '',
+      vert_partial: ''
+    }
+  }
+
+  getShaderVarName(param_name) {
+    let split_name = param_name.split('_');
+    let name = split_name.shift();
+    name = split_name.reduce((accName, currName) => {
+      accName += currName.charAt(0).toUpperCase() + currName.slice(1);
+      return accName;
+    }, name);
+    name += this.id;
+    return name;
+  }
+
+  getShaderVars() {
+    let vars = '';
+    let params = Object.getOwnPropertyDescriptors(this);
+
+    for (const key in params) {
+      if (key === 'config' || key === 'id') continue;
+
+      let type;
+      let name = this.getShaderVarName(key);
+
+      const param = params[key];
+      if (typeof param.value === 'object'
+        && !('options' in param.value)) {
+        let size = Object.values(param.value).length;
+        type = `vec${size}`;
+      } else {
+        type = 'float';
+      }
+
+      vars += `uniform ${type} ${name};\n`;
+    }
+
+    return vars;
+  }
+
+  getFragShaderVars() {
+    return '';
+  }
+
+  getVertShaderVars() {
+    return '';
+  }
+
+  getFragShaderMain() {
+    return this.config.frag_partial;
+  }
+
+  getVertShaderMain() {
+    return this.config.vert_partial;
   }
 
   getParams() {
@@ -27,4 +84,31 @@ class Effect {
   }
 }
 
-export { Effect };
+class FragEffect extends Effect {
+
+  constructor(id) {
+    super(id);
+  }
+
+  getFragShaderVars() {
+    return this.getShaderVars();
+  }
+
+  getFragShaderMain() {
+    let main = super.getFragShaderMain();
+    main += '\ncolor = max(min(color, vec3(1)), vec3(0));\n';
+    return main;
+  }
+}
+
+class VertEffect extends Effect {
+  constructor(id) {
+    super(id);
+  }
+
+  getVertShaderVars() {
+    return this.getShaderVars();
+  }
+}
+
+export { Effect, FragEffect, VertEffect };
