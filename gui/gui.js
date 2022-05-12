@@ -367,7 +367,8 @@ class Gui {
       }
 
       // Single number assumed to be a flag
-      else if (typeof param.value === 'number') {
+      else if (typeof param.value === 'number' ||
+        typeof param.value === 'boolean') {
         const checkbox = Gui.createCheckbox(callback);
         checkbox.id = `${key}#single`;
         param_div.appendChild(checkbox);

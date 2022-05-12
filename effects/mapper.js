@@ -51,6 +51,7 @@ class Mapper extends FragEffect {
   }
 
   setParams(params) {
+    super.setParams(params);
     if ('color_ratio' in params) this.color_ratio = params['color_ratio'];
     if ('color_space' in params) {
       this.color_space.selected = this.color_space.options.findIndex(opt => opt === params['color_space']);
@@ -72,7 +73,7 @@ class Mapper extends FragEffect {
   }
 
   getParams() {
-    let params = {};
+    let params = super.getParams();
     params[`colorRatio${this.id}`] = Object.values(this.color_ratio);
     params[`colorSpace${this.id}`] = this.color_space.selected;
     return params;

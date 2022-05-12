@@ -25,6 +25,9 @@ class Effect {
       frag_partial: '',
       vert_partial: ''
     }
+    this.disabled = false;
+
+    this.config.uniforms[`disabled${this.id}`] = (_, props) => props[`disabled${this.id}`];
   }
 
   getShaderVarName(param_name) {
@@ -53,6 +56,8 @@ class Effect {
         && !('options' in param.value)) {
         let size = Object.values(param.value).length;
         type = `vec${size}`;
+      } else if (typeof param.value === 'boolean') {
+        type = 'bool';
       } else {
         type = 'float';
       }
@@ -79,8 +84,14 @@ class Effect {
     return this.config.vert_partial;
   }
 
+  setParams(params) {
+    if ('disabled' in params) this.disabled = params['disabled'] === 'false' ? false : true;
+  }
+
   getParams() {
-    return {};
+    let params = {};
+    params[`disabled${this.id}`] = this.disabled;
+    return params;
   }
 }
 
@@ -95,8 +106,9 @@ class FragEffect extends Effect {
   }
 
   getFragShaderMain() {
-    let main = super.getFragShaderMain();
-    main += '\ncolor = max(min(color, vec3(1)), vec3(0));\n';
+    let main = `if (!disabled${this.id}) {\n`;
+    main += super.getFragShaderMain();
+    main += '\ncolor = max(min(color, vec3(1)), vec3(0));\n}';
     return main;
   }
 }
@@ -108,6 +120,13 @@ class VertEffect extends Effect {
 
   getVertShaderVars() {
     return this.getShaderVars();
+  }
+
+  getVertShaderMain() {
+    let main = `if (!disabled${this.id}) {\n`;
+    main += super.getVertShaderMain();
+    main += '\n}';
+    return main;
   }
 }
 

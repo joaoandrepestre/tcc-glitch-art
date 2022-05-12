@@ -23,12 +23,13 @@ class Filter extends FragEffect {
   }
 
   setParams(params) {
+    super.setParams(params);
     if ('threshold' in params) this.threshold = params['threshold'];
     if ('high_low' in params) this.high_low = params['high_low'] === 'true' ? -1.0 : 1.0;
   }
 
   getParams() {
-    let params = {};
+    let params = super.getParams();
     params[`threshold${this.id}`] = Object.values(this.threshold);
     params[`highLow${this.id}`] = this.high_low;
     return params;
