@@ -17,6 +17,7 @@ class EffectsChain {
 
     this.regl = regl;
     this.fx_chain = [];
+    this.nextId = 0;
     this.regl_command = null;
     this.defineReglCommand();
   }
@@ -102,17 +103,33 @@ class EffectsChain {
   addEffect(effect_name) {
     if (!(effect_name in EffectsChain.fx_reg)) throw new Error(`Attempting to add unregistered effect ${effect_name}`);
 
-    const id = this.fx_chain.length;
-    const fx = new EffectsChain.fx_reg[effect_name](id);
+    const fx = new EffectsChain.fx_reg[effect_name](this.nextId++);
     this.fx_chain.push(fx);
     this.defineReglCommand();
-    return fx;
+    return fx.getMetadata();
   }
 
-  removeEffect(effect) {
-    const index = this.fx_chain.findIndex(fx => fx === effect);
+  editEffect(id, params) {
+    let fx = this.fx_chain[id];
+    fx.setParams(params);
+    return fx.getMetadata();
+  }
+
+  removeEffect(effectId) {
+    const index = this.fx_chain.findIndex(fx => fx.id === effectId);
     this.fx_chain.splice(index, 1);
     this.defineReglCommand();
+  }
+
+  export() {
+    return this.fx_chain.map(fx => fx.export());
+  }
+
+  import(effects) {
+    effects.forEach(fx_info => {
+      let fx = this.addEffect(fx_info.type);
+      fx.setParams(fx_info.params);
+    });
   }
 
   // Applies all effects, in order, to the src_image

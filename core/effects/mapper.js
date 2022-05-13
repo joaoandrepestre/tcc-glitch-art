@@ -1,4 +1,4 @@
-import { Gui } from "../gui/gui.js";
+import { Gui } from "../../gui/gui.js";
 import { FragEffect } from "./effect.js";
 
 // Mapper effect, mixes color color space with the color space chosen by the user
@@ -67,8 +67,6 @@ class Mapper extends FragEffect {
         this.color_ratio['sat'] = r[1];
         this.color_ratio['value'] = r[2];
       }
-      let newLabels = Object.keys(this.color_ratio).map(key => key.replace('_', ' ').toUpperCase());
-      Gui.updateEffectEditorLabels(this.id, 'color_ratio', newLabels);
     }
   }
 

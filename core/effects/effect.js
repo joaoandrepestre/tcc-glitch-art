@@ -30,6 +30,17 @@ class Effect {
     this.config.uniforms[`disabled${this.id}`] = (_, props) => props[`disabled${this.id}`];
   }
 
+  forEachParam(callback) {
+    let params = Object.getOwnPropertyDescriptors(this);
+    for (const key in params) {
+      if (key === 'config' || key === 'id') continue;
+
+      const param = params[key];
+
+      callback(key, param.value);
+    }
+  }
+
   getShaderVarName(param_name) {
     let split_name = param_name.split('_');
     let name = split_name.shift();
@@ -43,27 +54,22 @@ class Effect {
 
   getShaderVars() {
     let vars = '';
-    let params = Object.getOwnPropertyDescriptors(this);
-
-    for (const key in params) {
-      if (key === 'config' || key === 'id') continue;
-
+    this.forEachParam((key, value) => {
       let type;
       let name = this.getShaderVarName(key);
 
-      const param = params[key];
-      if (typeof param.value === 'object'
-        && !('options' in param.value)) {
-        let size = Object.values(param.value).length;
+      if (typeof value === 'object'
+        && !('options' in value)) {
+        let size = Object.values(value).length;
         type = `vec${size}`;
-      } else if (typeof param.value === 'boolean') {
+      } else if (typeof value === 'boolean') {
         type = 'bool';
       } else {
         type = 'float';
       }
 
       vars += `uniform ${type} ${name};\n`;
-    }
+    });
 
     return vars;
   }
@@ -92,6 +98,56 @@ class Effect {
     let params = {};
     params[`disabled${this.id}`] = this.disabled;
     return params;
+  }
+
+  export() {
+    return {
+      type: this.constructor.name.toLowerCase(),
+      id: this.id,
+      params: this.exportParams(),
+    };
+  }
+
+  exportParams() {
+    let ret = {};
+    this.forEachParam((key, value) => {
+      ret[key] = value;
+    });
+    return ret;
+  }
+
+  getMetadata() {
+    let params = [];
+    this.forEachParam((key, value) => {
+      let type = typeof value;
+      let labels = [];
+      let val = null;
+      if (type === 'object') {
+        if ('options' in value) {
+          type = 'select';
+          val = Object.values(value['options']);
+          val.push(value['selected'])
+        }
+        else {
+          type = 'multi';
+          val = Object.values(value);
+          labels = Object.keys(value);
+        }
+      } else {
+        val = value;
+      }
+      params.push({
+        name: key,
+        type,
+        value: val,
+        labels
+      });
+    });
+    return {
+      type: this.constructor.name.toLowerCase(),
+      id: this.id,
+      params
+    };
   }
 }
 

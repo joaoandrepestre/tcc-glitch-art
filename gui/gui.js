@@ -1,5 +1,6 @@
 import { tryGetValue } from "../utils.js";
-import { EffectsChain } from "../effects/effects_chain.js";
+import { EffectsChain } from "../core/effects/effects_chain.js";
+import { Core } from "../core/core.js";
 
 
 class Gui {
@@ -66,13 +67,33 @@ class Gui {
     Object.values(labels)
       .filter(l => l.innerHTML !== paramLabel)
       .forEach((l, i) => {
-        l.innerHTML = newLabels[i];
+        l.innerHTML = newLabels[i].replace('_', ' ').toUpperCase();
       });
   }
 
-  static resize(width, height) {
-    let w = width;
-    let h = height;
+  constructor(core) {
+    this.core = core;
+
+    this.static_zone = document.getElementById('gui_static');
+    this.file_zone = document.getElementById('file_zone');
+    this.canvas = document.getElementById('canvas');
+    this.initStaticZone();
+    this.dynamic_zone = document.getElementById('gui_dynamic');
+
+    this.src_webcam = null;
+  }
+
+  initStaticZone() {
+    this.createImageUploader();
+    this.createWebcamSelector();
+    this.createProjectDownloader();
+    this.createImageDownloader();
+    this.createEffectSelector();
+  }
+
+  resize(dimensions) {
+    let w = dimensions.width;
+    let h = dimensions.height;
     const maxW = window.innerWidth;
     const maxH = window.innerHeight;
 
@@ -88,44 +109,8 @@ class Gui {
       }
     }
 
-    return {
-      width: w,
-      height: h
-    };
-  }
-
-  constructor(regl, fx_chain) {
-    this.regl = regl;
-
-    this.fx_chain = fx_chain;
-    this.static_zone = document.getElementById('gui_static');
-    this.file_zone = document.getElementById('file_zone');
-    this.canvas = document.getElementById('canvas');
-    this.initStaticZone();
-    this.dynamic_zone = document.getElementById('gui_dynamic');
-
-    this.src_webcam = null;
-    this.src_video = null;
-    this.texture = null;
-
-    this.image_loaded = false;
-    this.video_loaded = false;
-    this.webcam_loaded = false;
-
-    this.framerate = 30;
-  }
-
-  defineTexture(source) {
-    if (this.texture !== null) this.texture.destroy();
-    this.texture = this.regl.texture({ data: source, flipY: true });
-  }
-
-  initStaticZone() {
-    this.createImageUploader();
-    this.createWebcamSelector();
-    //this.createFramerateSlider();
-    this.createImageDownloader();
-    this.createEffectSelector();
+    this.canvas.width = w;
+    this.canvas.height = h;
   }
 
   createImageUploader() {
@@ -147,45 +132,18 @@ class Gui {
       let file = file_input.files[0];
       reader.onload = (event) => {
         let str = event.target.result;
-        let src = null;
-        let onload = (e) => {
-          let w = e.target.width || e.target.videoWidth;
-          let h = e.target.height || e.target.videoHeight;
-          let dim = Gui.resize(w, h);
-
-          this.defineTexture(src);
-          this.canvas.width = dim.width;
-          this.canvas.height = dim.height;
-          this.image_loaded = false;
-          this.video_loaded = false;
-          this.webcam_loaded = false;
-          if (this.src_webcam != null)
-            this.src_webcam.getTracks()[0].stop();
-          this.src_video = null;
-        };
 
         if (file.type.startsWith('video')) {
-          src = document.createElement('video');
-          src.muted = true;
-          src.loop = true;
-          src.src = str;
-          src.onloadeddata = (e) => {
-            onload(e);
-            src.play();
-            this.src_video = src;
-            this.video_loaded = true;
-          };
-          src.load();
+          this.core.defineVideoSource(str)
+            .then(dimensions => this.resize(dimensions));
         } else {
-          src = new Image();
-          src.onload = (e) => {
-            onload(e);
-            this.image_loaded = true;
-          };
-          src.src = str;
+          this.core.defineImageSource(str)
+            .then(dimensions => this.resize(dimensions));
         }
 
         file_input.value = null;
+        if (this.src_webcam != null)
+          this.src_webcam.getTracks()[0].stop();
       };
 
       reader.readAsDataURL(file);
@@ -214,25 +172,8 @@ class Gui {
       if (navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
           .then(stream => {
+            this.core.defineWebcamSource(stream).then(dimensions => this.resize(dimensions));
             this.src_webcam = stream;
-            let src = document.createElement('video');
-            src.muted = true;
-            src.srcObject = stream;
-            src.onloadeddata = (e) => {
-              let w = e.target.width || e.target.videoWidth;
-              let h = e.target.height || e.target.videoHeight;
-              let dim = Gui.resize(w, h);
-
-              this.defineTexture(src);
-              this.canvas.width = dim.width;
-              this.canvas.height = dim.height;
-              this.image_loaded = false;
-              this.video_loaded = false;
-              src.play();
-              this.src_video = src;
-              this.webcam_loaded = true;
-            };
-            src.load();
           })
           .catch(err => console.log(err));
       }
@@ -241,13 +182,26 @@ class Gui {
     this.file_zone.appendChild(div);
   }
 
+  createProjectDownloader() {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'downloader');
+    const button = document.createElement('button');
+    button.innerHTML = 'Save Project...';
+    button.addEventListener('click', () => {
+      let state = this.core.export();
+      console.log(state);
+    });
+    div.appendChild(button);
+    this.file_zone.appendChild(div);
+  }
+
   createImageDownloader() {
     const div = document.createElement('div');
-    div.setAttribute('class', 'image-downloader');
+    div.setAttribute('class', 'downloader');
     const button = document.createElement('button');
     button.innerHTML = 'Save as Image...';
     button.addEventListener('click', () => {
-      if (!this.srcLoaded() || !this.fx_chain.modified()) return;
+      if (!this.core.sourceLoaded() || !this.core.modified()) return;
       let link = document.createElement('a');
       link.download = 'output_image.png';
       link.href = document.getElementById('canvas').toDataURL('image/png');
@@ -274,14 +228,14 @@ class Gui {
     const div = document.createElement('div');
     div.setAttribute('class', 'effect-selector');
     const form = document.createElement('form');
-    const selector = Gui.createSelector(Object.keys(EffectsChain.fx_reg));
+    const selector = Gui.createSelector(this.core.getRegisteredEffects());
     selector.setAttribute('id', 'fx_selector');
     form.appendChild(selector);
 
     const button = Gui.createSubmitButton((_) => {
-      if (!this.srcLoaded()) return;
-      const fx = this.fx_chain.addEffect(fx_selector.value);
-      this.createEffectEditor(fx);
+      if (!this.core.sourceLoaded()) return;
+      const metadata = this.core.addEffect(fx_selector.value);
+      this.createEffectEditor(metadata);
     });
     button.innerHTML = 'Add Effect';
     form.appendChild(button);
@@ -290,20 +244,20 @@ class Gui {
     this.static_zone.appendChild(div);
   }
 
-  createEffectEditor(fx) {
+  createEffectEditor(metadata) {
 
     // background div
     const div = document.createElement('div');
-    div.id = fx.id;
+    div.id = metadata.id;
     div.setAttribute('class', 'effect-editor');
-    Gui.addLabel(div, fx.constructor.name);
+    Gui.addLabel(div, metadata.type);
 
     // delete button
     const delete_button = document.createElement('button');
     delete_button.setAttribute('class', 'delete_button');
     delete_button.innerHTML = 'X'
     delete_button.addEventListener('click', (event) => {
-      this.fx_chain.removeEffect(fx);
+      this.core.removeEffect(metadata.id);
       this.dynamic_zone.removeChild(div);
     });
     div.appendChild(delete_button);
@@ -328,80 +282,57 @@ class Gui {
         }
       });
 
-      fx.setParams(params);
+      let newMeta = this.core.editEffect(metadata.id, params);
+      newMeta.params.forEach(param => {
+        if (param.labels.length === 0) return;
+        Gui.updateEffectEditorLabels(newMeta.id, param.name, param.labels);
+      });
     };
 
     // param editors
-    const fx_params = Object.getOwnPropertyDescriptors(fx);
-    for (const key in fx_params) {
-      if (key === 'config' || key === 'id') continue;
-
-      const param = fx_params[key];
-
+    metadata.params.forEach(param => {
       // background div
       const param_div = document.createElement('div');
-      param_div.id = key;
+      param_div.id = param.name;
       param_div.setAttribute('class', 'param_editor');
-      Gui.addLabel(param_div, key);
+      Gui.addLabel(param_div, param.name);
 
       // multi type parameters, not simple numbers
-      if (typeof param.value === 'object') {
-        // multiple choice - select
-        if ('options' in param.value) {
-          const selector = Gui.createSelector(param.value['options'], callback);
-          selector.id = `${key}#single`
-          param_div.appendChild(selector);
-        }
-        else {
-          // sliders for multi numbers
-          for (const slider_key in param.value) {
-            Gui.newLine(param_div);
-            const v = param.value[slider_key];
-            const slider = Gui.createSlider(0, 100, callback);
-            slider.id = `${key}#multi#${slider_key}`
-            slider.value = v * 100;
-            Gui.addLabel(param_div, slider_key);
-            param_div.appendChild(slider);
-          }
+      // multiple choice - select
+      if (param.type === 'select') {
+        const v = param.value.pop();
+        const selector = Gui.createSelector(param.value, callback);
+        selector.id = `${param.name}#single`
+        selector.value = param.value[v];
+        param_div.appendChild(selector);
+      }
+      // sliders for multi numbers
+      if (param.type === 'multi') {
+        for (let i = 0; i < param.value.length; i++) {
+          Gui.newLine(param_div);
+          const slider = Gui.createSlider(0, 100, callback);
+          slider.id = `${param.name}#multi#${param.labels[i]}`
+          slider.value = param.value[i] * 100;
+          Gui.addLabel(param_div, param.labels[i]);
+          param_div.appendChild(slider);
         }
       }
 
       // Single number assumed to be a flag
-      else if (typeof param.value === 'number' ||
-        typeof param.value === 'boolean') {
+      else if (param.type === 'number' || param.type === 'boolean') {
         const checkbox = Gui.createCheckbox(callback);
-        checkbox.id = `${key}#single`;
+        checkbox.id = `${param.name}#single`;
         param_div.appendChild(checkbox);
         Gui.newLine(param_div);
       }
       div.appendChild(param_div);
-    }
+    });
 
     this.dynamic_zone.appendChild(div);
   }
 
-  srcLoaded() {
-    return this.image_loaded || this.video_loaded || this.webcam_loaded;
-  }
-
   update() {
-    let i = 0;
-    this.regl.frame(() => {
-      let divider = 60 / this.framerate;
-      i = Math.trunc((i + 1) % divider);
-      if (i) return;
-
-      this.regl.clear({
-        color: [0.21, 0.27, 0.31, 1]
-      });
-
-      if (this.srcLoaded()) {
-        if (this.video_loaded || this.webcam_loaded) {
-          this.defineTexture(this.src_video);
-        }
-        this.fx_chain.apply(this.texture);
-      }
-    });
+    this.core.update([0.21, 0.27, 0.31, 1]);
   }
 }
 

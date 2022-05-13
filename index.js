@@ -1,12 +1,11 @@
-import { EffectsChain } from './effects/effects_chain.js';
+import { Core } from './core/core.js';
 import { Gui } from './gui/gui.js';
 
 window.onload = async () => {
-  const gl = document.getElementById('canvas').getContext('webgl', { preserveDrawingBuffer: true });
-  const regl = createREGL(gl);
+  const canvas = document.getElementById('canvas');
 
-  const fx = new EffectsChain(regl);
-  const gui = new Gui(regl, fx);
+  const core = new Core(canvas);
+  const gui = new Gui(core);
 
   gui.update();
 };
