@@ -35,12 +35,12 @@ class Gui {
     return checkbox;
   }
 
-  static createSelector(options, callback = () => { }) {
+  static createSelector(options, values = options, callback = () => { }) {
     const selector = document.createElement('select');
     for (const i in options) {
       const option = options[i];
       const opt = document.createElement('option');
-      opt.value = option;
+      opt.value = values[i];
       opt.innerHTML = option;
       selector.appendChild(opt);
     }
@@ -86,6 +86,7 @@ class Gui {
   initStaticZone() {
     this.createImageUploader();
     this.createWebcamSelector();
+    this.createProjectUploader();
     this.createProjectDownloader();
     this.createImageDownloader();
     this.createEffectSelector();
@@ -156,7 +157,7 @@ class Gui {
     div.appendChild(form);
 
     const main_button = document.createElement('button');
-    main_button.innerHTML = 'Open File...'
+    main_button.innerHTML = 'Open File...';
     main_button.addEventListener('click', () => file_input.click());
     div.appendChild(main_button);
 
@@ -182,14 +183,74 @@ class Gui {
     this.file_zone.appendChild(div);
   }
 
+  resetDynamicZone() {
+    let child = this.dynamic_zone.firstElementChild;
+    while (child) {
+      this.dynamic_zone.removeChild(child);
+      child = this.dynamic_zone.firstElementChild;
+    }
+  }
+
+  createProjectUploader() {
+    const div = document.createElement('div');
+    div.setAttribute('class', 'image-uploader');
+    const form = document.createElement('form');
+
+    const file_input = document.createElement('input');
+    file_input.id = 'file_input';
+    file_input.type = 'file';
+    file_input.accept = 'json';
+    file_input.hidden = true;
+
+    const button = Gui.createSubmitButton((_) => {
+      if (!file_input.value.length) return;
+
+      let reader = new FileReader();
+
+      let file = file_input.files[0];
+      reader.onload = (event) => {
+        let str = event.target.result;
+        let json = JSON.parse(str);
+        console.log(json);
+        let res = this.core.import(json);
+
+        res.source_result.then(dimensions => this.resize(dimensions));
+
+        this.resetDynamicZone();
+        res.effects_metadatas.forEach(metadata => {
+          this.createEffectEditor(metadata);
+        });
+        file_input.value = null;
+      };
+
+      reader.readAsText(file);
+    });
+    button.hidden = true;
+    file_input.addEventListener('change', () => button.click());
+    form.appendChild(file_input);
+
+    form.appendChild(button);
+    div.appendChild(form);
+
+    const main_button = document.createElement('button');
+    main_button.innerHTML = 'Load Project...';
+    main_button.addEventListener('click', () => file_input.click());
+    div.appendChild(main_button);
+
+    this.file_zone.appendChild(div);
+  }
+
   createProjectDownloader() {
     const div = document.createElement('div');
     div.setAttribute('class', 'downloader');
     const button = document.createElement('button');
     button.innerHTML = 'Save Project...';
     button.addEventListener('click', () => {
-      let state = this.core.export();
-      console.log(state);
+      if (!this.core.sourceLoaded() || !this.core.modified()) return;
+      let link = document.createElement('a');
+      link.download = 'project.json'
+      link.href = `data:text/json;charset=utf-8,${encodeURI(JSON.stringify(this.core.export()))}`;
+      link.click();
     });
     div.appendChild(button);
     this.file_zone.appendChild(div);
@@ -272,19 +333,24 @@ class Gui {
 
       const params = {};
       inputs.forEach(input => {
-        const [key, type, subkey] = input.id.split('#');
+        let [key, type, subkey, subtype] = input.id.split('#');
+        subtype = subtype === undefined ? subkey : subtype;
 
         if (type.startsWith('multi')) {
           let multi = tryGetValue(params, key, {});
           multi[subkey] = input.value / 100.0;
-        } else {
-          params[key] = input.value;
+        } else if (subtype === 'boolean') {
+          params[key] = input.value === 'true' ? true : false;
+        } else if (subtype === 'number') {
+          params[key] = input.value === 'true' ? -1.0 : 1.0;
+        } else if (subtype === 'select') {
+          params[key] = parseInt(input.value);
         }
       });
 
       let newMeta = this.core.editEffect(metadata.id, params);
       newMeta.params.forEach(param => {
-        if (param.labels.length === 0) return;
+        if (param.labels === undefined) return;
         Gui.updateEffectEditorLabels(newMeta.id, param.name, param.labels);
       });
     };
@@ -300,10 +366,10 @@ class Gui {
       // multi type parameters, not simple numbers
       // multiple choice - select
       if (param.type === 'select') {
-        const v = param.value.pop();
-        const selector = Gui.createSelector(param.value, callback);
-        selector.id = `${param.name}#single`
-        selector.value = param.value[v];
+        const values = param.options.map((_, i) => i);
+        const selector = Gui.createSelector(param.options, values, callback);
+        selector.id = `${param.name}#single#${param.type}`
+        selector.value = param.value;
         param_div.appendChild(selector);
       }
       // sliders for multi numbers
@@ -311,7 +377,7 @@ class Gui {
         for (let i = 0; i < param.value.length; i++) {
           Gui.newLine(param_div);
           const slider = Gui.createSlider(0, 100, callback);
-          slider.id = `${param.name}#multi#${param.labels[i]}`
+          slider.id = `${param.name}#multi#${param.labels[i]}#${param.type}`
           slider.value = param.value[i] * 100;
           Gui.addLabel(param_div, param.labels[i]);
           param_div.appendChild(slider);
@@ -321,7 +387,9 @@ class Gui {
       // Single number assumed to be a flag
       else if (param.type === 'number' || param.type === 'boolean') {
         const checkbox = Gui.createCheckbox(callback);
-        checkbox.id = `${param.name}#single`;
+        checkbox.id = `${param.name}#single#${param.type}`;
+        checkbox.value = param.value;
+        checkbox.checked = param.value;
         param_div.appendChild(checkbox);
         Gui.newLine(param_div);
       }

@@ -59,7 +59,7 @@ class Effect {
       let name = this.getShaderVarName(key);
 
       if (typeof value === 'object'
-        && !('options' in value)) {
+        && !('selected' in value)) {
         let size = Object.values(value).length;
         type = `vec${size}`;
       } else if (typeof value === 'boolean') {
@@ -91,7 +91,9 @@ class Effect {
   }
 
   setParams(params) {
-    if ('disabled' in params) this.disabled = params['disabled'] === 'false' ? false : true;
+    this.forEachParam((key, value) => {
+      if (key in params) this[key] = params[key];
+    });
   }
 
   getParams() {
@@ -119,29 +121,26 @@ class Effect {
   getMetadata() {
     let params = [];
     this.forEachParam((key, value) => {
+      let param = {
+        name: key,
+      };
       let type = typeof value;
-      let labels = [];
-      let val = null;
       if (type === 'object') {
-        if ('options' in value) {
-          type = 'select';
-          val = Object.values(value['options']);
-          val.push(value['selected'])
+        if ('selected' in value) {
+          param['type'] = 'select';
+          param['options'] = Object.values(this.constructor.options);
+          param['value'] = value['selected'];
         }
         else {
-          type = 'multi';
-          val = Object.values(value);
-          labels = Object.keys(value);
+          param['type'] = 'multi';
+          param['value'] = Object.values(value);
+          param['labels'] = Object.keys(value);
         }
       } else {
-        val = value;
+        param['type'] = type;
+        param['value'] = value;
       }
-      params.push({
-        name: key,
-        type,
-        value: val,
-        labels
-      });
+      params.push(param);
     });
     return {
       type: this.constructor.name.toLowerCase(),

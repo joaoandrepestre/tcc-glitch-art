@@ -1,4 +1,3 @@
-import { Gui } from "../../gui/gui.js";
 import { FragEffect } from "./effect.js";
 
 // Mapper effect, mixes color color space with the color space chosen by the user
@@ -6,6 +5,13 @@ import { FragEffect } from "./effect.js";
 //  - color_ratio: porportion of color values to mixed in with the chosen color space
 //  - color_spaces: selected color space, as well as options to choose from 
 class Mapper extends FragEffect {
+
+  static options = [
+    'HSL',
+    'HCV',
+    'HSV',
+  ];
+
   constructor(id) {
     super(id);
     this.color_ratio = {
@@ -15,11 +21,6 @@ class Mapper extends FragEffect {
     };
     this.color_space = {
       selected: 0,
-      options: [
-        'HSL',
-        'HCV',
-        'HSV',
-      ]
     };
 
     this.config.uniforms[`colorRatio${this.id}`] = (_, props) => props[`colorRatio${this.id}`];
@@ -52,9 +53,9 @@ class Mapper extends FragEffect {
 
   setParams(params) {
     super.setParams(params);
-    if ('color_ratio' in params) this.color_ratio = params['color_ratio'];
     if ('color_space' in params) {
-      this.color_space.selected = this.color_space.options.findIndex(opt => opt === params['color_space']);
+      let color_space = typeof params['color_space'] === 'object' ? params['color_space'].selected : params['color_space'];
+      this.color_space = { selected: color_space };
       let r = Object.values(this.color_ratio);
       this.color_ratio = { hue: r[0] };
       if (this.color_space.selected == 0) {

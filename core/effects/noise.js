@@ -21,11 +21,6 @@ class Noise extends FragEffect {
     `;
   }
 
-  setParams(params) {
-    super.setParams(params);
-    if ('noise_factor' in params) this.noise_factor = params['noise_factor'];
-  }
-
   getParams() {
     let params = super.getParams();
     params[`noiseFactor${this.id}`] = Object.values(this.noise_factor);

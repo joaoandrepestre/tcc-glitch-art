@@ -20,7 +20,7 @@ class Source {
   }
 
   set(sourceType, sourceData) {
-    if (!(sourceType instanceof SourceType)) throw new Error('Invalid or unsupported source type');
+    if (!(sourceType instanceof SourceType)) throw new Error('Invalid or unsupported source');
 
     this.sourceType = sourceType;
     this.sourceData = sourceData;
@@ -59,7 +59,7 @@ class Source {
 
   export() {
     return {
-      type: this.sourceType,
+      type: this.sourceType.name,
       data: this.sourceData.src,
     };
   }

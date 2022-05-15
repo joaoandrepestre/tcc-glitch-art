@@ -96,6 +96,31 @@ class Core {
     });
   }
 
+  import(settings) {
+    let s = settings.source;
+    let source_result;
+    switch (s.type) {
+      case 'img':
+        source_result = this.defineImageSource(s.data);
+        break;
+      case 'vid':
+        source_result = this.defineVideoSource(s.data);
+      case 'webcam':
+        // ???
+        break;
+      default:
+        throw new Error('Invalid or unsupported source');
+    }
+
+    this.effectsChain = new EffectsChain(this.regl);
+    let effects_metadatas = this.effectsChain.import(settings.effects);
+
+    return {
+      source_result,
+      effects_metadatas
+    };
+  }
+
   export() {
     return {
       source: this.source.export(),

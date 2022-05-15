@@ -110,7 +110,8 @@ class EffectsChain {
   }
 
   editEffect(id, params) {
-    let fx = this.fx_chain[id];
+    const index = this.fx_chain.findIndex(fx => fx.id === id);
+    let fx = this.fx_chain[index];
     fx.setParams(params);
     return fx.getMetadata();
   }
@@ -126,10 +127,13 @@ class EffectsChain {
   }
 
   import(effects) {
+    let metadatas = [];
     effects.forEach(fx_info => {
-      let fx = this.addEffect(fx_info.type);
-      fx.setParams(fx_info.params);
+      let metadata = this.addEffect(fx_info.type);
+      metadata = this.editEffect(metadata.id, fx_info.params);
+      metadatas.push(metadata);
     });
+    return metadatas;
   }
 
   // Applies all effects, in order, to the src_image

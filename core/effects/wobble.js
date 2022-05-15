@@ -15,11 +15,6 @@ class Wobble extends VertEffect {
     `;
   }
 
-  setParams(params) {
-    super.setParams(params);
-    if ('args' in params) this.args = params['args'];
-  }
-
   getParams() {
     let params = super.getParams();
     params[`args${this.id}`] = Object.values(this.args);
