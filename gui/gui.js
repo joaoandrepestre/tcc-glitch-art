@@ -143,8 +143,10 @@ class Gui {
         }
 
         file_input.value = null;
-        if (this.src_webcam != null)
+        if (this.src_webcam != null) {
           this.src_webcam.getTracks()[0].stop();
+          this.src_webcam = null;
+        }
       };
 
       reader.readAsDataURL(file);
@@ -164,20 +166,28 @@ class Gui {
     this.file_zone.appendChild(div);
   }
 
+  getWebcamStream() {
+    if (this.src_webcam !== null) return Promise.resolve(this.src_webcam);
+
+    if (navigator.mediaDevices.getUserMedia) {
+      return navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          this.src_webcam = stream;
+          return this.src_webcam;
+        })
+        .catch(err => console.log(err));
+    }
+  }
+
   createWebcamSelector() {
     const div = document.createElement('div');
     div.setAttribute('class', 'webcam-button');
     const button = document.createElement('button');
     button.innerHTML = 'Open Webcam';
     button.addEventListener('click', () => {
-      if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            this.core.defineWebcamSource(stream).then(dimensions => this.resize(dimensions));
-            this.src_webcam = stream;
-          })
-          .catch(err => console.log(err));
-      }
+      this.getWebcamStream()
+        .then(stream => this.core.defineWebcamSource(stream))
+        .then(dimensions => this.resize(dimensions));
     });
     div.appendChild(button);
     this.file_zone.appendChild(div);
@@ -214,7 +224,15 @@ class Gui {
         console.log(json);
         let res = this.core.import(json);
 
-        res.source_result.then(dimensions => this.resize(dimensions));
+        res.source_result
+          .then(res => {
+            if (res === 'webcam-request') {
+              return this.getWebcamStream()
+                .then(stream => this.core.defineWebcamSource(stream));
+            }
+            return res;
+          })
+          .then(dimensions => this.resize(dimensions));
 
         this.resetDynamicZone();
         res.effects_metadatas.forEach(metadata => {

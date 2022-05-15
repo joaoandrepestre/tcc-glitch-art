@@ -106,7 +106,7 @@ class Core {
       case 'vid':
         source_result = this.defineVideoSource(s.data);
       case 'webcam':
-        // ???
+        source_result = Promise.resolve('webcam-request');
         break;
       default:
         throw new Error('Invalid or unsupported source');
