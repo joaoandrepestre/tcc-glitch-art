@@ -1,3 +1,4 @@
+import createREGL from './lib/regl.min.js';
 import { EffectsChain } from "./effects/effects_chain.js";
 import { Source, SourceType } from "./source.js";
 

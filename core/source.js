@@ -1,4 +1,4 @@
-import { wait } from "../utils.js";
+import { wait } from "./utils.js";
 
 const MAX_TRIES = 10;
 

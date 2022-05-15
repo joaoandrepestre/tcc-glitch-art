@@ -1,5 +1,4 @@
-import { tryGetValue } from "../utils.js";
-import { EffectsChain } from "../core/effects/effects_chain.js";
+import { tryGetValue } from "./utils.js";
 import { Core } from "../core/core.js";
 
 
@@ -71,12 +70,11 @@ class Gui {
       });
   }
 
-  constructor(core) {
-    this.core = core;
-
+  constructor() {
     this.static_zone = document.getElementById('gui_static');
     this.file_zone = document.getElementById('file_zone');
     this.canvas = document.getElementById('canvas');
+    this.core = new Core(this.canvas);
     this.initStaticZone();
     this.dynamic_zone = document.getElementById('gui_dynamic');
 
@@ -221,7 +219,6 @@ class Gui {
       reader.onload = (event) => {
         let str = event.target.result;
         let json = JSON.parse(str);
-        console.log(json);
         let res = this.core.import(json);
 
         res.source_result
