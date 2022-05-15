@@ -20,9 +20,10 @@ class Core {
     return this.effectsChain.modified();
   }
 
-  defineTexture() {
+  defineTexture(flipX = 1) {
     if (this.texture !== null) this.texture.destroy();
     this.texture = this.regl.texture({ data: this.source.sourceData, flipY: true });
+    this.effectsChain.flipX = flipX;
   }
 
   defineImageSource(dataURL) {
@@ -57,7 +58,7 @@ class Core {
     data.muted = true;
     data.onloadeddata = () => {
       this.source.set(SourceType.WEBCAM, data);
-      this.defineTexture();
+      this.defineTexture(-1);
       data.play(); // maybe change ??
     };
     data.srcObject = stream;
@@ -89,7 +90,8 @@ class Core {
 
       if (this.source.isLoaded()) {
         if (this.source.isVideo()) {
-          this.defineTexture();
+          let flipX = this.source.isWebcam() ? -1 : 1;
+          this.defineTexture(flipX);
         }
         this.effectsChain.apply(this.texture);
       }

@@ -34,6 +34,10 @@ class Source {
     return this.sourceType === SourceType.VID || this.sourceType === SourceType.WEBCAM;
   }
 
+  isWebcam() {
+    return this.sourceType === SourceType.WEBCAM;
+  }
+
   getDimensions() {
     return new Promise((resolve, reject) => {
       (async () => {

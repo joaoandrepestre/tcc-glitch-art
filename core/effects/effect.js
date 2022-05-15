@@ -12,6 +12,7 @@ class Effect {
     uniforms: {
       texture: (_, props) => props.texture,
       time: ctx => ctx.time % 60,
+      flipX: (_, props) => props.flipX,
     },
 
     count: 10,

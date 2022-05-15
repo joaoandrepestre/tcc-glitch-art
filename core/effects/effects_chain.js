@@ -18,6 +18,8 @@ class EffectsChain {
     this.regl = regl;
     this.fx_chain = [];
     this.nextId = 0;
+    this.flipX = 1;
+
     this.regl_command = null;
     this.defineReglCommand();
   }
@@ -45,12 +47,14 @@ class EffectsChain {
       precision mediump float;
       attribute vec2 position;
       uniform float time;
+      uniform float flipX;
       varying vec2 uv;
       ${partialShaderCode.vars}
 
       void main() {
         uv = 0.5 + 0.5 * position;
         vec2 pos = position;
+        pos.x = flipX * pos.x;
         ${partialShaderCode.main}
         gl_Position = vec4(pos, 0, 1.0);
       }
@@ -146,7 +150,7 @@ class EffectsChain {
           ...params
         };
       }, {});
-    this.regl_command({ texture, ...params });
+    this.regl_command({ texture, ...params, flipX: this.flipX });
   }
 }
 
