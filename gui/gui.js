@@ -406,8 +406,11 @@ class Gui {
       else if (param.type === 'number' || param.type === 'boolean') {
         const checkbox = Gui.createCheckbox(callback);
         checkbox.id = `${param.name}#single#${param.type}`;
-        checkbox.value = param.value;
-        checkbox.checked = param.value;
+        let v = param.type === 'number' ?
+          (-1 * (param.value - 1) / 2) == true
+          : param.value
+        checkbox.value = v;
+        checkbox.checked = v;
         param_div.appendChild(checkbox);
         Gui.newLine(param_div);
       }
