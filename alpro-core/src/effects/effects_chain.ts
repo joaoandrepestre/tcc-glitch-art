@@ -1,15 +1,35 @@
-const Effect = require('./effect.js').Effect;
-const Noise = require('./noise.js');
-const Filter = require('./filter.js');
-const Mapper = require('./mapper.js');
-const Wobble = require('./wobble.js');
+import { DrawCommand, DrawConfig, Regl, Texture } from "regl";
+import { Effect, EffectMetadata, ExportedEffect } from './effect';
+import Noise from "./noise";
+import Filter from "./filter";
+import Mapper from "./mapper";
+import Wobble from "./wobble";
+
+interface EffectConstructor {
+  new(id: number): Effect;
+}
+
+type EffecstRegistry = {
+  [key: string]: EffectConstructor;
+};
+
+type PartialShaderCode = {
+  vars: string;
+  main: string;
+};
 
 // Chain of effects to be applied in order
-class EffectsChain {
+export default class EffectsChain {
 
-  static fx_reg = {};
+  static fx_reg: EffecstRegistry = {};
 
-  constructor(regl) {
+  regl: Regl;
+  fx_chain: Effect[];
+  nextId: number;
+  flipX: number;
+  regl_command: DrawCommand;
+
+  constructor(regl: Regl) {
     EffectsChain.fx_reg['noise'] = Noise;
     EffectsChain.fx_reg['filter'] = Filter;
     EffectsChain.fx_reg['mapper'] = Mapper;
@@ -24,7 +44,7 @@ class EffectsChain {
     this.defineReglCommand();
   }
 
-  defineFragShader(partialShaderCode) {
+  defineFragShader(partialShaderCode: PartialShaderCode): string {
     return `
       precision mediump float;
       uniform sampler2D texture;
@@ -42,7 +62,7 @@ class EffectsChain {
     `;
   }
 
-  defineVertShader(partialShaderCode) {
+  defineVertShader(partialShaderCode: PartialShaderCode): string {
     return `
       precision mediump float;
       attribute vec2 position;
@@ -61,7 +81,7 @@ class EffectsChain {
     `;
   }
 
-  defineReglCommand() {
+  defineReglCommand(): void {
     let config_part = this.fx_chain
       .reduce((accConfig, fx) => {
 
@@ -86,7 +106,7 @@ class EffectsChain {
     let frag = this.defineFragShader(config_part.frag_shader);
     let vert = this.defineVertShader(config_part.vert_shader);
 
-    let config = {
+    let config: DrawConfig = {
       ...Effect.basicConfig,
       uniforms: {
         ...Effect.basicConfig.uniforms,
@@ -99,12 +119,12 @@ class EffectsChain {
     this.regl_command = this.regl(config);
   }
 
-  modified() {
+  modified(): boolean {
     return this.fx_chain.length > 0;
   }
 
   // Adds a new instance of the chosen effect
-  addEffect(effect_name) {
+  addEffect(effect_name: string): EffectMetadata {
     if (!(effect_name in EffectsChain.fx_reg)) throw new Error(`Attempting to add unregistered effect ${effect_name}`);
 
     const fx = new EffectsChain.fx_reg[effect_name](this.nextId++);
@@ -113,24 +133,24 @@ class EffectsChain {
     return fx.getMetadata();
   }
 
-  editEffect(id, params) {
+  editEffect(id: number, params: object): EffectMetadata {
     const index = this.fx_chain.findIndex(fx => fx.id === id);
     let fx = this.fx_chain[index];
     fx.setParams(params);
     return fx.getMetadata();
   }
 
-  removeEffect(effectId) {
+  removeEffect(effectId: number): void {
     const index = this.fx_chain.findIndex(fx => fx.id === effectId);
     this.fx_chain.splice(index, 1);
     this.defineReglCommand();
   }
 
-  export() {
+  export(): ExportedEffect[] {
     return this.fx_chain.map(fx => fx.export());
   }
 
-  import(effects) {
+  import(effects: ExportedEffect[]): EffectMetadata[] {
     let metadatas = [];
     effects.forEach(fx_info => {
       let metadata = this.addEffect(fx_info.type);
@@ -141,7 +161,7 @@ class EffectsChain {
   }
 
   // Applies all effects, in order, to the src_image
-  apply(texture) {
+  apply(texture: Texture): void {
     let params = this.fx_chain
       .map(fx => fx.getParams())
       .reduce((accParams, params) => {
@@ -153,5 +173,3 @@ class EffectsChain {
     this.regl_command({ texture, ...params, flipX: this.flipX });
   }
 }
-
-module.exports = EffectsChain;

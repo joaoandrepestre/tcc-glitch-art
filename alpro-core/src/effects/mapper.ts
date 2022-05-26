@@ -1,10 +1,10 @@
-const FragEffect = require('./effect.js').FragEffect;
+import { FragEffect } from './effect';
 
 // Mapper effect, mixes color color space with the color space chosen by the user
 // parameters:
 //  - color_ratio: porportion of color values to mixed in with the chosen color space
 //  - color_spaces: selected color space, as well as options to choose from 
-class Mapper extends FragEffect {
+export default class Mapper extends FragEffect {
 
   static options = [
     'HSL',
@@ -12,7 +12,10 @@ class Mapper extends FragEffect {
     'HSV',
   ];
 
-  constructor(id) {
+  color_ratio: object;
+  color_space: object;
+
+  constructor(id: number) {
     super(id);
     this.color_ratio = {
       hue: 0.5,
@@ -51,32 +54,30 @@ class Mapper extends FragEffect {
     `;
   }
 
-  setParams(params) {
+  setParams(params: object) {
     super.setParams(params);
     if ('color_space' in params) {
       let color_space = typeof params['color_space'] === 'object' ? params['color_space'].selected : params['color_space'];
       this.color_space = { selected: color_space };
       let r = Object.values(this.color_ratio);
       this.color_ratio = { hue: r[0] };
-      if (this.color_space.selected == 0) {
+      if (this.color_space['selected'] == 0) {
         this.color_ratio['sat'] = r[1];
         this.color_ratio['light'] = r[2];
-      } else if (this.color_space.selected == 1) {
+      } else if (this.color_space['selected'] == 1) {
         this.color_ratio['chroma'] = r[1];
         this.color_ratio['value'] = r[2];
-      } else if (this.color_space.selected == 2) {
+      } else if (this.color_space['selected'] == 2) {
         this.color_ratio['sat'] = r[1];
         this.color_ratio['value'] = r[2];
       }
     }
   }
 
-  getParams() {
+  getParams(): object {
     let params = super.getParams();
     params[`colorRatio${this.id}`] = Object.values(this.color_ratio);
-    params[`colorSpace${this.id}`] = this.color_space.selected;
+    params[`colorSpace${this.id}`] = this.color_space['selected'];
     return params;
   }
 }
-
-module.exports = Mapper;

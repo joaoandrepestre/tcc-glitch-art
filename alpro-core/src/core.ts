@@ -1,9 +1,25 @@
-const createREGL = require('regl');
-const EffectsChain = require('./effects/effects_chain.js');
-const { Source, SourceType } = require('./source.js');
+import * as createREGL from 'regl';
+import { EffectMetadata, ExportedEffect } from './effects/effect.js';
+import EffectsChain from './effects/effects_chain.js';
+import { Dimensions, ExportedSource, Source, SourceType } from './source.js';
 
-class Core {
-  constructor(canvas) {
+type ExportedState = {
+  source: ExportedSource;
+  effects: ExportedEffect[];
+};
+
+type ImportResult = {
+  source_result: Promise<Dimensions | string>;
+  effects_metadatas: EffectMetadata[]
+};
+
+export default class Core {
+  regl: createREGL.Regl;
+  source: Source;
+  effectsChain: EffectsChain;
+  texture: createREGL.Texture;
+
+  constructor(canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
     this.regl = createREGL(gl);
 
@@ -13,21 +29,21 @@ class Core {
     this.texture = null;
   }
 
-  sourceLoaded() {
+  sourceLoaded(): boolean {
     return this.source.isLoaded();
   }
 
-  modified() {
+  modified(): boolean {
     return this.effectsChain.modified();
   }
 
-  defineTexture(flipX = 1) {
+  defineTexture(flipX: number = 1) {
     if (this.texture !== null) this.texture.destroy();
     this.texture = this.regl.texture({ data: this.source.sourceData, flipY: true });
     this.effectsChain.flipX = flipX;
   }
 
-  defineImageSource(dataURL) {
+  defineImageSource(dataURL: string): Promise<Dimensions> {
     this.source.set(SourceType.UNSET, null);
     let data = new Image();
     data.onload = () => {
@@ -38,7 +54,7 @@ class Core {
     return this.source.getDimensions();
   }
 
-  defineVideoSource(dataURL) {
+  defineVideoSource(dataURL: string): Promise<Dimensions> {
     this.source.set(SourceType.UNSET, null);
     let data = document.createElement('video');
     data.muted = true;
@@ -53,7 +69,7 @@ class Core {
     return this.source.getDimensions();
   }
 
-  defineWebcamSource(stream) {
+  defineWebcamSource(stream: MediaStream): Promise<Dimensions> {
     this.source.set(SourceType.UNSET, null);
     let data = document.createElement('video');
     data.muted = true;
@@ -67,23 +83,23 @@ class Core {
     return this.source.getDimensions();
   }
 
-  getRegisteredEffects() {
+  getRegisteredEffects(): string[] {
     return Object.keys(EffectsChain.fx_reg);
   }
 
-  addEffect(effectType) {
+  addEffect(effectType: string): EffectMetadata {
     return this.effectsChain.addEffect(effectType); // SHOULD RETURN NEW EFFECT's METADATA
   }
 
-  editEffect(id, params) {
+  editEffect(id: number, params: object): EffectMetadata {
     return this.effectsChain.editEffect(id, params); // SHOULD RETURN EDITED METADATA
   }
 
-  removeEffect(effect) {
-    this.effectsChain.removeEffect(effect);
+  removeEffect(effectId: number): void {
+    this.effectsChain.removeEffect(effectId);
   }
 
-  update(bgColor) {
+  update(bgColor: createREGL.Vec4) {
     this.regl.frame(() => {
       this.regl.clear({
         color: bgColor
@@ -99,7 +115,7 @@ class Core {
     });
   }
 
-  import(settings) {
+  import(settings: ExportedState): ImportResult {
     let s = settings.source;
     let source_result;
     switch (s.type) {
@@ -124,12 +140,10 @@ class Core {
     };
   }
 
-  export() {
+  export(): ExportedState {
     return {
       source: this.source.export(),
       effects: this.effectsChain.export(),
     };
   }
 }
-
-module.exports = Core;

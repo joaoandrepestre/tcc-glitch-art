@@ -1,8 +1,11 @@
-const VertEffect = require('./effect.js').VertEffect;
+import { VertEffect } from "./effect";
 
 // Wobble effect, ondulates the image around an axis
-class Wobble extends VertEffect {
-  constructor(id) {
+export default class Wobble extends VertEffect {
+
+  args: object;
+
+  constructor(id: number) {
     super(id);
     this.args = {
       freq: 0.5,
@@ -15,11 +18,9 @@ class Wobble extends VertEffect {
     `;
   }
 
-  getParams() {
+  getParams(): object {
     let params = super.getParams();
     params[`args${this.id}`] = Object.values(this.args);
     return params;
   }
 }
-
-module.exports = Wobble;

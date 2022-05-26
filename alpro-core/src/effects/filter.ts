@@ -1,11 +1,15 @@
-const FragEffect = require('./effect.js').FragEffect;
+import { FragEffect } from './effect';
 
 // Filter effect, applies a rgb filter to the image
 // parameters:
 //  - threshold: from 0 to 1, indicates the cut-off point for the filter for each rgb component
 //  - high_low: 1 or -1, indicates if the filter is low pass or high pass. Defaults to 1, high pass
-class Filter extends FragEffect {
-  constructor(id) {
+export default class Filter extends FragEffect {
+
+  threshold: object;
+  high_low: number;
+
+  constructor(id: number) {
     super(id);
     this.threshold = {
       red: 0.5,
@@ -22,12 +26,10 @@ class Filter extends FragEffect {
     `;
   }
 
-  getParams() {
+  getParams(): object {
     let params = super.getParams();
     params[`threshold${this.id}`] = Object.values(this.threshold);
     params[`highLow${this.id}`] = this.high_low;
     return params;
   }
 }
-
-module.exports = Filter;

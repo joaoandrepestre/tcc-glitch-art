@@ -2,7 +2,7 @@
   "name": "alpro-core",
   "version": "1.0.0",
   "description": "core graphics engine for processing chained glitch art effects on a video source",
-  "main": "core.js",
+  "main": "dist/core.js",
   "directories": {
     "lib": "lib"
   },
@@ -13,5 +13,8 @@
   "license": "MIT",
   "dependencies": {
     "regl": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/es6-promise": "^3.3.0"
   }
 }

@@ -1,8 +1,37 @@
+import { DrawConfig } from "regl";
+import Mapper from "./mapper";
+
+type ReglPartialConfig = {
+  uniforms: object,
+  frag_partial: string,
+  vert_partial: string,
+}
+
+export type ExportedEffect = {
+  type: string;
+  id: number;
+  params: object;
+};
+
+type ParamMetadata = {
+  name: string;
+  type: string;
+  value: any;
+  options: string[] | undefined;
+  labels: string[] | undefined;
+};
+
+export type EffectMetadata = {
+  type: string;
+  id: number;
+  params: ParamMetadata[];
+};
+
 // Base Effect class defining the basic regl configurations for displaying an image
 // and static helper functions for initializing the effects
-class Effect {
+export class Effect {
   // basic regl config for displaying an image, used by all effects
-  static basicConfig = {
+  static basicConfig: DrawConfig = {
     attributes: {
       position: [[-2, -4], [-4, -2], [-4, 2], [-3, 3], [-2, 4], [2, 4], [3, 3], [4, 2], [4, -2], [-2, -4]]
     },
@@ -16,10 +45,16 @@ class Effect {
     },
 
     count: 10,
-    primitive: 'triangle fan'
+    primitive: 'triangle fan',
+    frag: undefined,
+    vert: undefined,
   };
 
-  constructor(id) {
+  id: number;
+  config: ReglPartialConfig;
+  disabled: boolean;
+
+  constructor(id: number) {
     this.id = id;
     this.config = {
       uniforms: {},
@@ -31,7 +66,7 @@ class Effect {
     this.config.uniforms[`disabled${this.id}`] = (_, props) => props[`disabled${this.id}`];
   }
 
-  forEachParam(callback) {
+  forEachParam(callback: (key: string, value: any) => void): void {
     let params = Object.getOwnPropertyDescriptors(this);
     for (const key in params) {
       if (key === 'config' || key === 'id') continue;
@@ -42,7 +77,7 @@ class Effect {
     }
   }
 
-  getShaderVarName(param_name) {
+  getShaderVarName(param_name: string): string {
     let split_name = param_name.split('_');
     let name = split_name.shift();
     name = split_name.reduce((accName, currName) => {
@@ -53,7 +88,7 @@ class Effect {
     return name;
   }
 
-  getShaderVars() {
+  getShaderVars(): string {
     let vars = '';
     this.forEachParam((key, value) => {
       let type;
@@ -75,35 +110,35 @@ class Effect {
     return vars;
   }
 
-  getFragShaderVars() {
+  getFragShaderVars(): string {
     return '';
   }
 
-  getVertShaderVars() {
+  getVertShaderVars(): string {
     return '';
   }
 
-  getFragShaderMain() {
+  getFragShaderMain(): string {
     return this.config.frag_partial;
   }
 
-  getVertShaderMain() {
+  getVertShaderMain(): string {
     return this.config.vert_partial;
   }
 
-  setParams(params) {
-    this.forEachParam((key, value) => {
+  setParams(params: object) {
+    this.forEachParam((key, _) => {
       if (key in params) this[key] = params[key];
     });
   }
 
-  getParams() {
+  getParams(): object {
     let params = {};
     params[`disabled${this.id}`] = this.disabled;
     return params;
   }
 
-  export() {
+  export(): ExportedEffect {
     return {
       type: this.constructor.name.toLowerCase(),
       id: this.id,
@@ -111,7 +146,7 @@ class Effect {
     };
   }
 
-  exportParams() {
+  exportParams(): object {
     let ret = {};
     this.forEachParam((key, value) => {
       ret[key] = value;
@@ -119,27 +154,31 @@ class Effect {
     return ret;
   }
 
-  getMetadata() {
-    let params = [];
+  getMetadata(): EffectMetadata {
+    let params: ParamMetadata[] = [];
     this.forEachParam((key, value) => {
-      let param = {
-        name: key,
-      };
+      let param: ParamMetadata;
+      param.name = key;
       let type = typeof value;
       if (type === 'object') {
         if ('selected' in value) {
-          param['type'] = 'select';
-          param['options'] = Object.values(this.constructor.options);
-          param['value'] = value['selected'];
+          param.type = 'select';
+          param.value = value['selected'];
+          let mapper = <typeof Mapper>this.constructor;
+          param.options = Object.values(mapper.options);
+          param.labels = undefined;
         }
         else {
-          param['type'] = 'multi';
-          param['value'] = Object.values(value);
-          param['labels'] = Object.keys(value);
+          param.type = 'multi';
+          param.value = Object.values(value);
+          param.options = undefined;
+          param.labels = Object.keys(value);
         }
       } else {
-        param['type'] = type;
-        param['value'] = value;
+        param.type = type;
+        param.value = value;
+        param.options = undefined;
+        param.labels = undefined;
       }
       params.push(param);
     });
@@ -151,17 +190,17 @@ class Effect {
   }
 }
 
-class FragEffect extends Effect {
+export class FragEffect extends Effect {
 
-  constructor(id) {
+  constructor(id: number) {
     super(id);
   }
 
-  getFragShaderVars() {
+  getFragShaderVars(): string {
     return this.getShaderVars();
   }
 
-  getFragShaderMain() {
+  getFragShaderMain(): string {
     let main = `if (!disabled${this.id}) {\n`;
     main += super.getFragShaderMain();
     main += '\ncolor = max(min(color, vec3(1)), vec3(0));\n}';
@@ -169,23 +208,19 @@ class FragEffect extends Effect {
   }
 }
 
-class VertEffect extends Effect {
-  constructor(id) {
+export class VertEffect extends Effect {
+  constructor(id: number) {
     super(id);
   }
 
-  getVertShaderVars() {
+  getVertShaderVars(): string {
     return this.getShaderVars();
   }
 
-  getVertShaderMain() {
+  getVertShaderMain(): string {
     let main = `if (!disabled${this.id}) {\n`;
     main += super.getVertShaderMain();
     main += '\n}';
     return main;
   }
 }
-
-exports.Effect = Effect;
-exports.FragEffect = FragEffect;
-exports.VertEffect = VertEffect;

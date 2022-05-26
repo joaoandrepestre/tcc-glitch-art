@@ -1,10 +1,13 @@
-const FragEffect = require('./effect.js').FragEffect;
+import { FragEffect } from "./effect";
 
 // Noise effect, applies some white noise to the image
 // parameters: 
 //  - noiseFactor: factor from 0 to 1 of the intensity of the noise for each color component
-class Noise extends FragEffect {
-  constructor(id) {
+export default class Noise extends FragEffect {
+
+  noise_factor: object;
+
+  constructor(id: number) {
     super(id);
     this.noise_factor = {
       red: 0.5,
@@ -21,11 +24,9 @@ class Noise extends FragEffect {
     `;
   }
 
-  getParams() {
+  getParams(): object {
     let params = super.getParams();
     params[`noiseFactor${this.id}`] = Object.values(this.noise_factor);
     return params;
   }
 }
-
-module.exports = Noise;
