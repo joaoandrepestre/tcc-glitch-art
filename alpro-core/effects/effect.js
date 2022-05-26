@@ -186,4 +186,6 @@ class VertEffect extends Effect {
   }
 }
 
-export { Effect, FragEffect, VertEffect };
+exports.Effect = Effect;
+exports.FragEffect = FragEffect;
+exports.VertEffect = VertEffect;

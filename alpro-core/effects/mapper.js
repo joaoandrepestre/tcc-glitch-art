@@ -1,4 +1,4 @@
-import { FragEffect } from "./effect.js";
+const FragEffect = require('./effect.js').FragEffect;
 
 // Mapper effect, mixes color color space with the color space chosen by the user
 // parameters:
@@ -79,4 +79,4 @@ class Mapper extends FragEffect {
   }
 }
 
-export { Mapper };
+module.exports = Mapper;

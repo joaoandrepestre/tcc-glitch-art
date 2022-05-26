@@ -1,8 +1,8 @@
-import { Effect } from "./effect.js";
-import { Noise } from "./noise.js";
-import { Filter } from "./filter.js";
-import { Mapper } from "./mapper.js";
-import { Wobble } from "./wobble.js";
+const Effect = require('./effect.js').Effect;
+const Noise = require('./noise.js');
+const Filter = require('./filter.js');
+const Mapper = require('./mapper.js');
+const Wobble = require('./wobble.js');
 
 // Chain of effects to be applied in order
 class EffectsChain {
@@ -154,4 +154,4 @@ class EffectsChain {
   }
 }
 
-export { EffectsChain };
+module.exports = EffectsChain;

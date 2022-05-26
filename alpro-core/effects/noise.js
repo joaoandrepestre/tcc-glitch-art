@@ -1,4 +1,4 @@
-import { FragEffect } from "./effect.js";
+const FragEffect = require('./effect.js').FragEffect;
 
 // Noise effect, applies some white noise to the image
 // parameters: 
@@ -28,4 +28,4 @@ class Noise extends FragEffect {
   }
 }
 
-export { Noise };
+module.exports = Noise;

@@ -1,4 +1,4 @@
-import { FragEffect } from "./effect.js";
+const FragEffect = require('./effect.js').FragEffect;
 
 // Filter effect, applies a rgb filter to the image
 // parameters:
@@ -30,4 +30,4 @@ class Filter extends FragEffect {
   }
 }
 
-export { Filter };
+module.exports = Filter;

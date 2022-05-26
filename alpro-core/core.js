@@ -1,6 +1,6 @@
-import createREGL from './lib/regl.min.js';
-import { EffectsChain } from "./effects/effects_chain.js";
-import { Source, SourceType } from "./source.js";
+const createREGL = require('regl');
+const EffectsChain = require('./effects/effects_chain.js');
+const { Source, SourceType } = require('./source.js');
 
 class Core {
   constructor(canvas) {
@@ -132,4 +132,4 @@ class Core {
   }
 }
 
-export { Core };
+module.exports = Core;

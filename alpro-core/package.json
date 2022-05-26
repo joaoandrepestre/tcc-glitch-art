@@ -1,0 +1,17 @@
+{
+  "name": "alpro-core",
+  "version": "1.0.0",
+  "description": "core graphics engine for processing chained glitch art effects on a video source",
+  "main": "core.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "João André Pestre",
+  "license": "MIT",
+  "dependencies": {
+    "regl": "^2.1.0"
+  }
+}

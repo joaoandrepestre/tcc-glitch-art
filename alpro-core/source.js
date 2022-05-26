@@ -1,4 +1,4 @@
-import { wait } from "./utils.js";
+const utils = require('./utils.js');
 
 const MAX_TRIES = 10;
 
@@ -44,7 +44,7 @@ class Source {
         let tries = 0;
         let debounce = 100;
         while (this.sourceType === SourceType.UNSET && tries < MAX_TRIES) {
-          await wait(debounce);
+          await utils.wait(debounce);
           tries++;
           debounce *= 1.5;
         }
@@ -69,4 +69,5 @@ class Source {
   }
 }
 
-export { Source, SourceType };
+exports.Source = Source;
+exports.SourceType = SourceType;
