@@ -157,7 +157,13 @@ export class Effect {
   getMetadata(): EffectMetadata {
     let params: ParamMetadata[] = [];
     this.forEachParam((key, value) => {
-      let param: ParamMetadata;
+      let param: ParamMetadata = {
+        name: undefined,
+        type: undefined,
+        value: undefined,
+        options: undefined,
+        labels: undefined,
+      };
       param.name = key;
       let type = typeof value;
       if (type === 'object') {

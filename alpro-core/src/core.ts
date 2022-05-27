@@ -1,4 +1,5 @@
-import * as createREGL from 'regl';
+const createREGL = require('regl');
+import { Regl, Texture } from 'regl';
 import { EffectMetadata, ExportedEffect } from './effects/effect.js';
 import EffectsChain from './effects/effects_chain.js';
 import { Dimensions, ExportedSource, Source, SourceType } from './source.js';
@@ -14,10 +15,10 @@ type ImportResult = {
 };
 
 export default class Core {
-  regl: createREGL.Regl;
+  regl: Regl;
   source: Source;
   effectsChain: EffectsChain;
-  texture: createREGL.Texture;
+  texture: Texture;
 
   constructor(canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
@@ -113,6 +114,12 @@ export default class Core {
         this.effectsChain.apply(this.texture);
       }
     });
+  }
+
+  resetState(): void {
+    this.source.set(SourceType.UNSET, null);
+    this.texture = null;
+    this.effectsChain.reset();
   }
 
   import(settings: ExportedState): ImportResult {

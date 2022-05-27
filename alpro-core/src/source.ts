@@ -68,8 +68,8 @@ export class Source {
 
         if (this.sourceData !== null) {
           resolve({
-            width: this.sourceData.width,
-            height: this.sourceData.height,
+            width: this.sourceData.width || this.sourceData['videoWidth'],
+            height: this.sourceData.height || this.sourceData['videoHeight'],
           });
         }
 

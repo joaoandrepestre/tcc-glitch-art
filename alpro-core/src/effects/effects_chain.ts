@@ -146,6 +146,13 @@ export default class EffectsChain {
     this.defineReglCommand();
   }
 
+  reset(): void {
+    this.fx_chain = [];
+    this.nextId = 0;
+    this.flipX = 1;
+    this.defineReglCommand();
+  }
+
   export(): ExportedEffect[] {
     return this.fx_chain.map(fx => fx.export());
   }
