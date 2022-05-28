@@ -3,16 +3,18 @@ import logo from './logo.svg';
 import './App.css';
 import Core from 'alpro-core';
 import MenuBar from './components/menu-bar/menu-bar';
+import EffectEditor from './components/effect-editors/effect-editor';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      width: 200,
-      height: 200,
+      width: 512,
+      height: 512,
       webcamStream: null,
       registeredEffects: [],
+      effectMetadatas: [],
     };
   }
 
@@ -22,7 +24,7 @@ class App extends Component {
     this.setState({
       registeredEffects: this.core.getRegisteredEffects(),
     })
-    this.core.update([1, 1, 1, 1]);
+    this.core.update([0, 0, 0, 0.8]);
   }
 
   getWebcamStream() {
@@ -94,7 +96,9 @@ class App extends Component {
       })
       .then(dim => this.resize(dim));
 
-    // create editor for effects
+    this.setState({
+      effectMetadatas: res.effects_metadatas,
+    });
   }
 
   saveProject() {
@@ -134,9 +138,20 @@ class App extends Component {
     link.click();
   }
 
-  addEffect(effectType) {
-    this.core.addEffect(effectType);
+  addEffect = (effectType) => {
+    const metadatas = this.state.effectMetadatas;
+    let metadata = this.core.addEffect(effectType)
+    metadatas.push(metadata);
+    this.setState({
+      effectMetadatas: metadatas,
+    });
   }
+
+  editEffect = (id) => (params) =>
+    this.core.editEffect(id, params);
+
+  removeEffect = (id) => () =>
+    this.core.removeEffect(id);
 
   render() {
     return (
@@ -157,7 +172,21 @@ class App extends Component {
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
         />
-        <canvas id="canvas" width={this.state.width} height={this.state.height}></canvas>
+        <canvas
+          id="canvas"
+          width={this.state.width}
+          height={this.state.height}
+          style={{ float: 'left', marginLeft: 50 }}
+        />
+        <div id='effects' style={{ float: 'left', marginLeft: 25 }}>
+          {this.state.effectMetadatas.map(metadata =>
+            <EffectEditor
+              key={metadata.id}
+              metadata={metadata}
+              editEffect={this.editEffect(metadata.id).bind(this)}
+              removeEffect={this.removeEffect(metadata.id).bind(this)} />
+          )}
+        </div>
       </div>
     );
   }

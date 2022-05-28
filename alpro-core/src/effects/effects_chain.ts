@@ -153,6 +153,10 @@ export default class EffectsChain {
     this.defineReglCommand();
   }
 
+  getMetadatas(): EffectMetadata[] {
+    return this.fx_chain.map(effect => effect.getMetadata());
+  }
+
   export(): ExportedEffect[] {
     return this.fx_chain.map(fx => fx.export());
   }

@@ -73,7 +73,7 @@ class FileDropdown extends Component {
   processProjectFile = (e) => {
     let reader = new FileReader();
 
-    let file_input = e.nativeEvent.target;
+    let file_input = e.target;
     let file = file_input.files[0];
     reader.onload = (e) => {
       let str = e.target.result;

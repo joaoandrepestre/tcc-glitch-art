@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { NavDropdown } from "react-bootstrap";
+import { firstLetterUpperCase } from "../../utils";
 
 class EffectDropdown extends Component {
 
@@ -11,17 +12,13 @@ class EffectDropdown extends Component {
     this.props.addEffect(effect);
   }
 
-  getEffectName(effect) {
-    return effect.charAt(0).toUpperCase() + effect.slice(1);
-  }
-
   render() {
     return (
       <NavDropdown title="Effect" id="basic-nav-dropdown">
         {this.props.registeredEffects.map(effect => {
           return (
             <NavDropdown.Item key={effect} onClick={this.addEffect(effect)}>
-              {this.getEffectName(effect)}
+              {firstLetterUpperCase(effect)}
             </NavDropdown.Item>
           );
         })}

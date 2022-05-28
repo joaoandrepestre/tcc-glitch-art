@@ -88,6 +88,10 @@ export default class Core {
     return Object.keys(EffectsChain.fx_reg);
   }
 
+  getEffectMetadatas(): EffectMetadata[] {
+    return this.effectsChain.getMetadatas();
+  }
+
   addEffect(effectType: string): EffectMetadata {
     return this.effectsChain.addEffect(effectType); // SHOULD RETURN NEW EFFECT's METADATA
   }
