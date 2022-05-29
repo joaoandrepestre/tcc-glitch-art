@@ -50,6 +50,7 @@ export class Effect {
     vert: undefined,
   };
 
+  type: string;
   id: number;
   config: ReglPartialConfig;
   disabled: boolean;
@@ -189,7 +190,7 @@ export class Effect {
       params.push(param);
     });
     return {
-      type: this.constructor.name.toLowerCase(),
+      type: this.type.toLowerCase(),
       id: this.id,
       params
     };

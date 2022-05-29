@@ -1,4 +1,4 @@
-import { Gui } from './gui/gui.js';
+import { Gui } from './gui.js';
 
 window.onload = async () => {
   const gui = new Gui();

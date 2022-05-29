@@ -14,6 +14,7 @@ class EffectEditor extends Component {
       show: true,
       params: this.buildParamsObject()
     };
+    console.log(props);
   }
 
   buildParamsObject = () => {
@@ -61,7 +62,7 @@ class EffectEditor extends Component {
       <div style={{ marginBottom: 5 }}>
         <Toast show={this.state.show} onClose={this.close}>
           <Toast.Header>
-            <strong className="me-auto">{firstLetterUpperCase(this.props.metadata.type)}</strong>
+            <strong className="me-auto">{firstLetterUpperCase(this.props.type)}</strong>
             <Switch
               checked={!this.state.params['disabled']}
               onChange={this.setDisabled}
@@ -71,7 +72,7 @@ class EffectEditor extends Component {
           <Toast.Body>
             <ListGroup>
               {this.props.metadata.params.map((param, idx) => {
-                if (param.name === 'disabled') return;
+                if (param.name === 'disabled') return <div></div>;
 
                 let paramEditor = <div></div>;
                 if (param.type === 'multi') {

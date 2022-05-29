@@ -143,7 +143,8 @@ class App extends Component {
 
   addEffect = (effectType) => {
     const metadatas = this.state.effectMetadatas;
-    let metadata = this.core.addEffect(effectType)
+    let metadata = this.core.addEffect(effectType);
+    console.log(metadata);
     metadatas.push(metadata);
     this.setState({
       effectMetadatas: metadatas,
@@ -193,6 +194,7 @@ class App extends Component {
           {this.state.effectMetadatas.map(metadata =>
             <EffectEditor
               key={metadata.id}
+              type={metadata.type}
               metadata={metadata}
               editEffect={this.editEffect(metadata.id).bind(this)}
               removeEffect={this.removeEffect(metadata.id).bind(this)} />

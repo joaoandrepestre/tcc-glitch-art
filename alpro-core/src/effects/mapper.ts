@@ -17,6 +17,7 @@ export default class Mapper extends FragEffect {
 
   constructor(id: number) {
     super(id);
+    this.type = 'mapper';
     this.color_ratio = {
       hue: 0.5,
       sat: 0.5,

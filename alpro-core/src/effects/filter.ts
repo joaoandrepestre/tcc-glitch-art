@@ -11,6 +11,7 @@ export default class Filter extends FragEffect {
 
   constructor(id: number) {
     super(id);
+    this.type = 'filter';
     this.threshold = {
       red: 0.5,
       green: 0.5,

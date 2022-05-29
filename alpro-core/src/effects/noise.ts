@@ -9,6 +9,7 @@ export default class Noise extends FragEffect {
 
   constructor(id: number) {
     super(id);
+    this.type = 'noise';
     this.noise_factor = {
       red: 0.5,
       green: 0.5,

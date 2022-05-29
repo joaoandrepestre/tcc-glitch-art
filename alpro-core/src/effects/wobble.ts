@@ -7,6 +7,7 @@ export default class Wobble extends VertEffect {
 
   constructor(id: number) {
     super(id);
+    this.type = 'wobble';
     this.args = {
       freq: 0.5,
       amp: 0.5
