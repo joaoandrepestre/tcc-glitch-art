@@ -84,6 +84,13 @@ class EffectEditor extends Component {
               <ListGroup>
                 {this.props.metadata.params
                   .filter(p => p.name !== 'disabled')
+                  .sort((a, b) => {
+                    if (a.type === 'number') return -1;
+                    if (b.type === 'number') return 1;
+                    if (a.type === 'select') return -1;
+                    if (b.type === 'select') return 1;
+                    return 0;
+                  })
                   .map((param, idx) => {
                     let paramEditor = <div>{param.name}</div>;
                     if (param.type === 'multi') {
