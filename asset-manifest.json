@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.0b4e74b4.css",
-    "main.js": "/static/js/main.eeaed63f.js",
-    "static/js/787.4b54e02e.chunk.js": "/static/js/787.4b54e02e.chunk.js",
-    "static/media/logo.svg": "/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
-    "index.html": "/index.html",
-    "main.0b4e74b4.css.map": "/static/css/main.0b4e74b4.css.map",
-    "main.eeaed63f.js.map": "/static/js/main.eeaed63f.js.map",
-    "787.4b54e02e.chunk.js.map": "/static/js/787.4b54e02e.chunk.js.map"
+    "main.css": "/tcc-glitch-art/static/css/main.0b4e74b4.css",
+    "main.js": "/tcc-glitch-art/static/js/main.5bacaba4.js",
+    "static/js/787.4b54e02e.chunk.js": "/tcc-glitch-art/static/js/787.4b54e02e.chunk.js",
+    "static/media/logo.svg": "/tcc-glitch-art/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/tcc-glitch-art/index.html",
+    "main.0b4e74b4.css.map": "/tcc-glitch-art/static/css/main.0b4e74b4.css.map",
+    "main.5bacaba4.js.map": "/tcc-glitch-art/static/js/main.5bacaba4.js.map",
+    "787.4b54e02e.chunk.js.map": "/tcc-glitch-art/static/js/787.4b54e02e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0b4e74b4.css",
-    "static/js/main.eeaed63f.js"
+    "static/js/main.5bacaba4.js"
   ]
 }
