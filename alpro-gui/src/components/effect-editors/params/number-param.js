@@ -11,10 +11,11 @@ class NumberParam extends Component {
   }
 
   setValue = (e) => {
+    const p = e.target.checked ? -1 : 1;
     this.setState({
-      param: e.target.checked ? -1 : 1,
+      param: p,
     });
-    this.props.setParam(this.props.name, this.state.param);
+    this.props.setParam(this.props.name, p);
   }
 
   render() {

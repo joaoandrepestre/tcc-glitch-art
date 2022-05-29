@@ -78,8 +78,11 @@ class App extends Component {
   newProject() {
     this.core.resetState();
     this.stopWebcam();
-
-    // reset effect editors
+    this.setState({
+      width: 512,
+      height: 512,
+      effectMetadatas: [],
+    });
   }
 
   updateProjectJSON(json) {
@@ -147,11 +150,19 @@ class App extends Component {
     });
   }
 
-  editEffect = (id) => (params) =>
+  editEffect = (id) => (params) => {
     this.core.editEffect(id, params);
+    this.setState({
+      effectMetadatas: this.core.getEffectMetadatas(),
+    });
+  }
 
-  removeEffect = (id) => () =>
+  removeEffect = (id) => () => {
     this.core.removeEffect(id);
+    this.setState({
+      effectMetadatas: this.core.getEffectMetadatas(),
+    });
+  }
 
   render() {
     return (

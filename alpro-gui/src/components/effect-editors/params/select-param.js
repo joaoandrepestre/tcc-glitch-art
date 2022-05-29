@@ -15,7 +15,7 @@ class SelectParam extends Component {
     this.setState({
       param: e.target.value,
     });
-    this.props.setParam(this.props.name, this.state.param);
+    this.props.setParam(this.props.name, e.target.value);
   }
 
   render() {

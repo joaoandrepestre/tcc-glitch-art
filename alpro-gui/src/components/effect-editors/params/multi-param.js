@@ -23,7 +23,7 @@ class MultiParam extends Component {
     this.setState({
       param: p,
     });
-    this.props.setParam(this.props.name, this.state.param);
+    this.props.setParam(this.props.name, p);
   }
 
   render() {
@@ -32,9 +32,9 @@ class MultiParam extends Component {
       <div>
         <label style={{ float: "left" }}>{formatLabel(this.props.name)}</label><br />
         {
-          p.map(([key, v]) =>
+          p.map(([key, v], idx) =>
             <div key={key}>
-              <label style={{ float: "left" }}>{formatLabel(key)}</label>
+              <label style={{ float: "left" }}>{formatLabel(this.props.labels[idx])}</label>
               <Slider
                 size="small"
                 aria-label="small"

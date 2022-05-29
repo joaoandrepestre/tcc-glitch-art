@@ -135,6 +135,7 @@ export default class Core {
         break;
       case 'vid':
         source_result = this.defineVideoSource(s.data);
+        break;
       case 'webcam':
         source_result = Promise.resolve('webcam-request');
         break;
