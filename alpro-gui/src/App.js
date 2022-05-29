@@ -4,6 +4,7 @@ import './App.css';
 import Core from 'alpro-core';
 import MenuBar from './components/menu-bar/menu-bar';
 import EffectEditor from './components/effect-editors/effect-editor';
+import EffectEditorZone from './components/effect-editors/effect-editor-zone';
 
 class App extends Component {
 
@@ -15,6 +16,7 @@ class App extends Component {
       webcamStream: null,
       registeredEffects: [],
       effectMetadatas: [],
+      activeEffect: '',
     };
   }
 
@@ -144,10 +146,10 @@ class App extends Component {
   addEffect = (effectType) => {
     const metadatas = this.state.effectMetadatas;
     let metadata = this.core.addEffect(effectType);
-    console.log(metadata);
     metadatas.push(metadata);
     this.setState({
       effectMetadatas: metadatas,
+      activeEffect: metadata.id,
     });
   }
 
@@ -162,6 +164,12 @@ class App extends Component {
     this.core.removeEffect(id);
     this.setState({
       effectMetadatas: this.core.getEffectMetadatas(),
+    });
+  }
+
+  changeActiveEffect = (effectKey) => {
+    this.setState({
+      activeEffect: effectKey,
     });
   }
 
@@ -188,18 +196,15 @@ class App extends Component {
           id="canvas"
           width={this.state.width}
           height={this.state.height}
-          style={{ float: 'left', marginLeft: 50 }}
+          style={{ float: 'left', marginLeft: 50, marginTop: 10 }}
         />
-        <div id='effects' style={{ float: 'left', marginLeft: 25 }}>
-          {this.state.effectMetadatas.map(metadata =>
-            <EffectEditor
-              key={metadata.id}
-              type={metadata.type}
-              metadata={metadata}
-              editEffect={this.editEffect(metadata.id).bind(this)}
-              removeEffect={this.removeEffect(metadata.id).bind(this)} />
-          )}
-        </div>
+        <EffectEditorZone
+          metadatas={this.state.effectMetadatas}
+          editEffect={this.editEffect.bind(this)}
+          removeEffect={this.removeEffect.bind(this)}
+          activeEffect={this.state.activeEffect}
+          changeActiveEffect={this.changeActiveEffect.bind(this)}
+        />
       </div>
     );
   }

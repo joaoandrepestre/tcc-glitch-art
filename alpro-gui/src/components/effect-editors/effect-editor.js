@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { ListGroup, Toast } from "react-bootstrap";
+import { Accordion, ListGroup, Toast } from "react-bootstrap";
 import { firstLetterUpperCase } from "../../utils";
 import { Switch } from '@mui/material';
 import MultiParam from "./params/multi-param";
@@ -14,7 +14,6 @@ class EffectEditor extends Component {
       show: true,
       params: this.buildParamsObject()
     };
-    console.log(props);
   }
 
   buildParamsObject = () => {
@@ -40,6 +39,7 @@ class EffectEditor extends Component {
   }
 
   setDisabled = (e) => {
+    e.nativeEvent.stopImmediatePropagation();
     const p = this.state.params;
     p.disabled = !e.target.checked;
     this.setState({
@@ -57,59 +57,71 @@ class EffectEditor extends Component {
     this.props.editEffect(this.state.params);
   }
 
+  toggleEffectEditor = (e) => {
+    e.stopPropagation();
+    const key = this.props.active ? '' : this.props.metadata.id;
+    this.props.changeActiveEffect(key);
+  }
+
   render() {
     return (
       <div style={{ marginBottom: 5 }}>
         <Toast show={this.state.show} onClose={this.close}>
-          <Toast.Header>
-            <strong className="me-auto">{firstLetterUpperCase(this.props.type)}</strong>
+          <Toast.Header
+            style={{ cursor: "pointer" }}
+            onClick={this.toggleEffectEditor}
+          >
+            <strong className="me-auto">{firstLetterUpperCase(this.props.type)}
+            </strong>
             <Switch
               checked={!this.state.params['disabled']}
-              onChange={this.setDisabled}
+              onClickCapture={this.setDisabled}
               size="small"
             />
           </Toast.Header>
-          <Toast.Body>
-            <ListGroup>
-              {this.props.metadata.params.map((param, idx) => {
-                if (param.name === 'disabled') return <div></div>;
-
-                let paramEditor = <div></div>;
-                if (param.type === 'multi') {
-                  paramEditor = (
-                    <MultiParam
-                      name={param.name}
-                      value={param.value}
-                      labels={param.labels}
-                      setParam={this.setParam.bind(this)}
-                    />
-                  );
-                }
-                if (param.type === 'number') {
-                  paramEditor = (
-                    <NumberParam
-                      name={param.name}
-                      value={param.value}
-                      leftLabel='High Pass'
-                      rightLabel='Low Pass'
-                      setParam={this.setParam.bind(this)}
-                    />
-                  );
-                }
-                if (param.type === 'select') {
-                  paramEditor = (
-                    <SelectParam
-                      name={param.name}
-                      value={param.value}
-                      options={param.options}
-                      setParam={this.setParam.bind(this)}
-                    />
-                  );
-                }
-                return <ListGroup.Item key={param.name}>{paramEditor}</ListGroup.Item>
-              })}
-            </ListGroup>
-          </Toast.Body>
+          <Accordion.Collapse eventKey={this.props.metadata.id}>
+            <Toast.Body>
+              <ListGroup>
+                {this.props.metadata.params
+                  .filter(p => p.name !== 'disabled')
+                  .map((param, idx) => {
+                    let paramEditor = <div>{param.name}</div>;
+                    if (param.type === 'multi') {
+                      paramEditor = (
+                        <MultiParam
+                          name={param.name}
+                          value={param.value}
+                          labels={param.labels}
+                          setParam={this.setParam.bind(this)}
+                        />
+                      );
+                    }
+                    if (param.type === 'number') {
+                      paramEditor = (
+                        <NumberParam
+                          name={param.name}
+                          value={param.value}
+                          leftLabel='High Pass'
+                          rightLabel='Low Pass'
+                          setParam={this.setParam.bind(this)}
+                        />
+                      );
+                    }
+                    if (param.type === 'select') {
+                      paramEditor = (
+                        <SelectParam
+                          name={param.name}
+                          value={param.value}
+                          options={param.options}
+                          setParam={this.setParam.bind(this)}
+                        />
+                      );
+                    }
+                    return <ListGroup.Item key={param.name}>{paramEditor}</ListGroup.Item>
+                  })}
+              </ListGroup>
+            </Toast.Body>
+          </Accordion.Collapse>
         </Toast >
       </div>
     );

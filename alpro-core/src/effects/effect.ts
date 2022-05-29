@@ -70,7 +70,7 @@ export class Effect {
   forEachParam(callback: (key: string, value: any) => void): void {
     let params = Object.getOwnPropertyDescriptors(this);
     for (const key in params) {
-      if (key === 'config' || key === 'id') continue;
+      if (key === 'config' || key === 'id' || key === 'type') continue;
 
       const param = params[key];
 
