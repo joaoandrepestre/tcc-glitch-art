@@ -11,13 +11,12 @@ class EffectEditorZone extends Component {
   render() {
     return (
       <div style={{ float: "left", width: window.innerWidth / 3, marginLeft: 25, marginTop: 25 }}>
-        <Accordion activeKey={this.props.activeEffect}>
+        <Accordion activeKey={this.props.activeEffects} alwaysOpen>
           {this.props.metadatas.map(metadata =>
             <EffectEditor
               key={metadata.id}
               type={metadata.type}
               metadata={metadata}
-              active={this.props.activeEffect === metadata.id}
               editEffect={this.props.editEffect(metadata.id)}
               removeEffect={this.props.removeEffect(metadata.id)}
               changeActiveEffect={this.props.changeActiveEffect}

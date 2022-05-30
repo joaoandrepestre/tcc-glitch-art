@@ -16,7 +16,7 @@ class App extends Component {
       webcamStream: null,
       registeredEffects: [],
       effectMetadatas: [],
-      activeEffect: '',
+      activeEffects: [],
     };
   }
 
@@ -144,13 +144,16 @@ class App extends Component {
   }
 
   addEffect = (effectType) => {
-    const metadatas = this.state.effectMetadatas;
+    const { effectMetadatas } = this.state;
+
     let metadata = this.core.addEffect(effectType);
-    metadatas.push(metadata);
+    effectMetadatas.push(metadata);
+
     this.setState({
-      effectMetadatas: metadatas,
-      activeEffect: metadata.id,
+      effectMetadatas: effectMetadatas,
     });
+
+    this.changeActiveEffect(metadata.id);
   }
 
   editEffect = (id) => (params) => {
@@ -168,8 +171,15 @@ class App extends Component {
   }
 
   changeActiveEffect = (effectKey) => {
+    const { activeEffects } = this.state;
+
+    let key = effectKey.toString();
+    let idx = activeEffects.findIndex(e => e === key);
+    if (idx === -1) activeEffects.push(key);
+    else activeEffects.splice(idx, 1);
+
     this.setState({
-      activeEffect: effectKey,
+      activeEffects: activeEffects,
     });
   }
 
@@ -202,7 +212,7 @@ class App extends Component {
           metadatas={this.state.effectMetadatas}
           editEffect={this.editEffect.bind(this)}
           removeEffect={this.removeEffect.bind(this)}
-          activeEffect={this.state.activeEffect}
+          activeEffects={this.state.activeEffects}
           changeActiveEffect={this.changeActiveEffect.bind(this)}
         />
       </div>

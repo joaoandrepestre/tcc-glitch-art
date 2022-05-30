@@ -58,9 +58,7 @@ class EffectEditor extends Component {
   }
 
   toggleEffectEditor = (e) => {
-    e.stopPropagation();
-    const key = this.props.active ? '' : this.props.metadata.id;
-    this.props.changeActiveEffect(key);
+    this.props.changeActiveEffect(this.props.metadata.id);
   }
 
   render() {
@@ -79,7 +77,7 @@ class EffectEditor extends Component {
               size="small"
             />
           </Toast.Header>
-          <Accordion.Collapse eventKey={this.props.metadata.id}>
+          <Accordion.Collapse eventKey={this.props.metadata.id.toString()}>
             <Toast.Body>
               <ListGroup>
                 {this.props.metadata.params
