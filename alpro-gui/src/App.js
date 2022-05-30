@@ -164,9 +164,17 @@ class App extends Component {
   }
 
   removeEffect = (id) => () => {
+    const { activeEffects } = this.state;
+
     this.core.removeEffect(id);
+
+    let key = id.toString();
+    let idx = activeEffects.findIndex(e => e === key);
+    if (idx !== -1) activeEffects.splice(idx, 1);
+
     this.setState({
       effectMetadatas: this.core.getEffectMetadatas(),
+      activeEffects: activeEffects,
     });
   }
 

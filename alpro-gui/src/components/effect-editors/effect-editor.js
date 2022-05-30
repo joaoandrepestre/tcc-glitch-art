@@ -33,7 +33,8 @@ class EffectEditor extends Component {
     return params;
   }
 
-  close = () => {
+  close = (e) => {
+    e.stopPropagation();
     this.setState({ show: false });
     this.props.removeEffect();
   }
