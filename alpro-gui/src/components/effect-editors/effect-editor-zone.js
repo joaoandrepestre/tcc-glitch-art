@@ -10,7 +10,7 @@ class EffectEditorZone extends Component {
 
   render() {
     return (
-      <div style={{ float: "left", width: window.innerWidth / 3, marginLeft: 25, marginTop: 25 }}>
+      <div style={{ float: "left", width: window.innerWidth / 3, marginTop: 15 }}>
         <Accordion activeKey={this.props.activeEffects} alwaysOpen>
           {this.props.metadatas.map(metadata =>
             <EffectEditor

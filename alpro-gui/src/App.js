@@ -3,8 +3,9 @@ import './App.css';
 import Core from 'alpro-core';
 import MenuBar from './components/menu-bar/menu-bar';
 import EffectEditorZone from './components/effect-editors/effect-editor-zone';
-import { Button, Card, Modal } from 'react-bootstrap';
-import { TextField } from '@mui/material';
+import { Button, Modal } from 'react-bootstrap';
+import { Grid, TextField } from '@mui/material';
+import SourcesZone from './components/sources-zone/sources-zone';
 
 class App extends Component {
 
@@ -18,6 +19,7 @@ class App extends Component {
       effectMetadatas: [],
       activeEffects: [],
       projectName: '',
+      sources: [],
 
       showNewProjectModal: false,
     };
@@ -95,6 +97,7 @@ class App extends Component {
       height: 512,
       effectMetadatas: [],
       activeEffects: [],
+      sources: [],
       showNewProjectModal: false,
     });
   }
@@ -103,6 +106,7 @@ class App extends Component {
     this.setState({
       projectName: json.projectName,
       activeEffects: json.activeEffects,
+      sources: json.sources,
     });
 
     let res = this.core.import(json.coreState);
@@ -133,6 +137,7 @@ class App extends Component {
     let fullState = {
       projectName: name,
       activeEffects: this.state.activeEffects,
+      sources: this.state.sources,
       coreState,
     };
     let content = JSON.stringify(fullState);
@@ -147,6 +152,21 @@ class App extends Component {
     this.setState({
       projectName,
     });
+  }
+
+  addSource = (source) => {
+    const { sources } = this.state;
+    sources.push(source);
+    this.setState({
+      sources,
+    });
+
+    if (!this.core.sourceLoaded()) this.setSource(source);
+  }
+
+  setSource = (source) => {
+    if (source.type === 'img') this.updateImgURL(source.data);
+    if (source.type === 'video') this.updateVidURL(source.data);
   }
 
   updateImgURL(dataURL) {
@@ -240,8 +260,7 @@ class App extends Component {
           updateProjectJSON={this.updateProjectJSON.bind(this)}
           saveProject={this.saveProject.bind(this)}
 
-          updateImgURL={this.updateImgURL.bind(this)}
-          updateVidURL={this.updateVidURL.bind(this)}
+          addSource={this.addSource.bind(this)}
           requestWebcam={this.requestWebcam.bind(this)}
 
           exportPNG={this.exportPNG.bind(this)}
@@ -250,19 +269,33 @@ class App extends Component {
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
         />
-        <canvas
-          id="canvas"
-          width={this.state.width}
-          height={this.state.height}
-          style={{ float: 'left', marginLeft: 50, marginTop: 10 }}
-        />
-        <EffectEditorZone
-          metadatas={this.state.effectMetadatas}
-          editEffect={this.editEffect.bind(this)}
-          removeEffect={this.removeEffect.bind(this)}
-          activeEffects={this.state.activeEffects}
-          changeActiveEffect={this.changeActiveEffect.bind(this)}
-        />
+        <Grid container spacing={2} style={{ marginLeft: 10, marginTop: 10 }}>
+          <Grid item>
+            <SourcesZone
+              sources={this.state.sources}
+              setSource={this.setSource.bind(this)}
+            />
+          </Grid>
+          <Grid item>
+            <canvas
+              id="canvas"
+              width={this.state.width}
+              height={this.state.height}
+              style={{ float: 'left', marginLeft: 50, marginTop: 10 }}
+            />
+          </Grid>
+          <Grid item>
+            <EffectEditorZone
+              metadatas={this.state.effectMetadatas}
+              editEffect={this.editEffect.bind(this)}
+              removeEffect={this.removeEffect.bind(this)}
+              activeEffects={this.state.activeEffects}
+              changeActiveEffect={this.changeActiveEffect.bind(this)}
+            />
+          </Grid>
+        </Grid>
+
+
 
         {/*New Project Modal*/}
         <Modal

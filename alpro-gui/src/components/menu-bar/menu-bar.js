@@ -47,8 +47,7 @@ class MenuBar extends Component {
                 updateProjectJSON={this.props.updateProjectJSON}
                 saveProject={this.props.saveProject}
 
-                updateImgURL={this.props.updateImgURL}
-                updateVidURL={this.props.updateVidURL}
+                addSource={this.props.addSource}
                 requestWebcam={this.props.requestWebcam}
 
                 exportPNG={this.props.exportPNG}

@@ -59,10 +59,10 @@ class FileDropdown extends Component {
       let dataURL = e.target.result;
 
       if (file.type.startsWith('video')) {
-        this.props.updateVidURL(dataURL);
+        this.props.addSource({ type: 'video', data: dataURL, name: file.name });
       }
       else {
-        this.props.updateImgURL(dataURL);
+        this.props.addSource({ type: 'img', data: dataURL, name: file.name });
       }
 
       file_input.value = null;
