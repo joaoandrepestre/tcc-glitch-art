@@ -6,6 +6,7 @@ import EffectEditorZone from './components/effect-editors/effect-editor-zone';
 import { Button, Modal } from 'react-bootstrap';
 import { Grid, TextField } from '@mui/material';
 import SourcesZone from './components/sources-zone/sources-zone';
+import { waitForCondition } from './utils';
 
 class App extends Component {
 
@@ -244,6 +245,32 @@ class App extends Component {
     });
   }
 
+  streamCanvas = () => {
+    const { width, height } = this.state;
+    const stream = this.canvas.captureStream();
+
+    const newWindow = window.open("", "_blank", `innerWidth=${width},innerHeight=${height},resizable=yes`);
+    waitForCondition(() => newWindow !== null, () => newWindow)
+      .then(w => {
+        w.document.body.style.backgroundColor = "black";
+        let vid = w.document.createElement('video');
+        vid.width = width;
+        vid.height = height;
+        vid.srcObject = stream;
+        vid.muted = true;
+        vid.onloadedmetadata = () => {
+          w.document.body.appendChild(vid);
+          vid.play();
+        };
+        vid.load();
+        w.onresize = e => {
+          vid.width = e.target.innerWidth;
+          vid.height = e.target.innerHeight;
+        };
+      });
+
+  }
+
   render() {
     let textWidth = this.state.projectName.length * 8.5;
     textWidth = textWidth > 100 ? textWidth : 100;
@@ -268,6 +295,9 @@ class App extends Component {
           // Effect
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
+
+          // Stream
+          streamCanvas={this.streamCanvas.bind(this)}
         />
         <Grid container spacing={2} style={{ marginLeft: 10, marginTop: 10 }}>
           <Grid item>

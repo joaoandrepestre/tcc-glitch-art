@@ -56,6 +56,7 @@ class MenuBar extends Component {
                 registeredEffects={this.props.registeredEffects}
                 addEffect={this.props.addEffect}
               />
+              <Nav.Link onClick={this.props.streamCanvas}>Stream</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
