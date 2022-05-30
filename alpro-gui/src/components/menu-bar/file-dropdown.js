@@ -14,7 +14,7 @@ class FileDropdown extends Component {
   loadProject = () => {
     let project_input = document.createElement('input');
     project_input.type = 'file';
-    project_input.accept = 'text/json';
+    project_input.accept = '.alpro';
     project_input.hidden = true;
     project_input.onchange = this.processProjectFile;
     project_input.click();

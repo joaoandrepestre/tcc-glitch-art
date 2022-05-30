@@ -1,3 +1,4 @@
+import { TextField } from '@mui/material';
 import React, { Component } from 'react';
 import { Navbar, Container, Nav } from 'react-bootstrap';
 import EffectDropdown from './effect-dropdown';
@@ -9,11 +10,35 @@ class MenuBar extends Component {
     super(props);
   }
 
+  changeProjectName = (e) => {
+    this.props.changeProjectName(e.target.value);
+  }
+
   render() {
+    let textWidth = this.props.projectName.length * 8.5;
+    textWidth = textWidth > 100 ? textWidth : 100;
     return (
       < Navbar bg="light" expand="lg" >
         <Container>
-          <Navbar.Brand href="#home">Alimento Processado</Navbar.Brand>
+          <Navbar.Brand>
+            <img
+              src={require("./trakinas_glitch.png")}
+              width='30'
+              height='30'
+              className='d-inline-block align-top'
+              alt=''
+            />{' '}
+            {this.props.projectName ? 'AlPro' : 'Alimento Processado'}
+          </Navbar.Brand>
+          <TextField
+            label="Project Name"
+            size='small'
+            style={{ width: textWidth, maxWidth: 200 }}
+            variant='standard'
+            value={this.props.projectName}
+            onChange={this.changeProjectName}
+            onKeyUp={(e) => { if (e.key === 'Enter') e.target.blur() }}
+          /> {this.props.projectName ? '.alpro' : ' '}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
