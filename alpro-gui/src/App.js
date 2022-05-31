@@ -249,11 +249,17 @@ class App extends Component {
     const { width, height } = this.state;
     const stream = this.canvas.captureStream();
 
-    const newWindow = window.open("", "_blank", `innerWidth=${width},innerHeight=${height},resizable=yes`);
+    const dxy = 5;
+    const newWindow = window.open("", "_blank",
+      `innerWidth=${width + dxy},innerHeight=${height + dxy},
+    resizable=yes,scrollbars=no,location=no,toolbar=no,popup=yes`);
     waitForCondition(() => newWindow !== null, () => newWindow)
       .then(w => {
         w.document.body.style.backgroundColor = "black";
         let vid = w.document.createElement('video');
+        vid.style.position = 'absolute';
+        vid.style.marginTop = `-${dxy}px`;
+        vid.style.marginLeft = `-${dxy}px`;
         vid.width = width;
         vid.height = height;
         vid.srcObject = stream;
@@ -264,8 +270,8 @@ class App extends Component {
         };
         vid.load();
         w.onresize = e => {
-          vid.width = e.target.innerWidth;
-          vid.height = e.target.innerHeight;
+          vid.width = e.target.innerWidth - dxy;
+          vid.height = e.target.innerHeight - dxy;
         };
       });
 
