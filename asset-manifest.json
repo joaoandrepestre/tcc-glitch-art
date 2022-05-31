@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/tcc-glitch-art/static/css/main.0b4e74b4.css",
-    "main.js": "/tcc-glitch-art/static/js/main.6d6fa894.js",
+    "main.js": "/tcc-glitch-art/static/js/main.0bb1d3d8.js",
     "static/js/787.4b54e02e.chunk.js": "/tcc-glitch-art/static/js/787.4b54e02e.chunk.js",
     "static/media/trakinas_glitch.png": "/tcc-glitch-art/static/media/trakinas_glitch.a6e1a4e8cfb847c948c6.png",
     "index.html": "/tcc-glitch-art/index.html",
     "main.0b4e74b4.css.map": "/tcc-glitch-art/static/css/main.0b4e74b4.css.map",
-    "main.6d6fa894.js.map": "/tcc-glitch-art/static/js/main.6d6fa894.js.map",
+    "main.0bb1d3d8.js.map": "/tcc-glitch-art/static/js/main.0bb1d3d8.js.map",
     "787.4b54e02e.chunk.js.map": "/tcc-glitch-art/static/js/787.4b54e02e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0b4e74b4.css",
-    "static/js/main.6d6fa894.js"
+    "static/js/main.0bb1d3d8.js"
   ]
 }
