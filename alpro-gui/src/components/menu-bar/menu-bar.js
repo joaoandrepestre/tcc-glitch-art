@@ -51,6 +51,7 @@ class MenuBar extends Component {
               <EffectDropdown
                 registeredEffects={this.props.registeredEffects}
                 addEffect={this.props.addEffect}
+                disabled={this.props.effectsDisabled}
               />
               <Nav.Link onClick={this.props.streamCanvas}>Stream</Nav.Link>
             </Nav>

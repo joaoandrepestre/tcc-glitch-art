@@ -59,6 +59,7 @@ class EffectEditor extends Component {
   }
 
   toggleEffectEditor = (e) => {
+    if (this.props.isDragging) return;
     this.props.changeActiveEffect(this.props.metadata.id);
   }
 
@@ -69,6 +70,7 @@ class EffectEditor extends Component {
           <Toast.Header
             style={{ cursor: "pointer" }}
             onClick={this.toggleEffectEditor}
+            closeButton={!this.props.isDragging}
           >
             <strong className="me-auto">{firstLetterUpperCase(this.props.type)}
             </strong>
@@ -76,6 +78,7 @@ class EffectEditor extends Component {
               checked={!this.state.params['disabled']}
               onClickCapture={this.setDisabled}
               size="small"
+              disabled={this.props.isDragging}
             />
           </Toast.Header>
           <Accordion.Collapse eventKey={this.props.metadata.id.toString()}>
@@ -99,6 +102,7 @@ class EffectEditor extends Component {
                           value={param.value}
                           labels={param.labels}
                           setParam={this.setParam.bind(this)}
+                          disabled={this.props.isDragging}
                         />
                       );
                     }
@@ -110,6 +114,7 @@ class EffectEditor extends Component {
                           leftLabel='High Pass'
                           rightLabel='Low Pass'
                           setParam={this.setParam.bind(this)}
+                          disabled={this.props.isDragging}
                         />
                       );
                     }
@@ -120,6 +125,7 @@ class EffectEditor extends Component {
                           value={param.value}
                           options={param.options}
                           setParam={this.setParam.bind(this)}
+                          disabled={this.props.isDragging}
                         />
                       );
                     }

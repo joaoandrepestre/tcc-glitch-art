@@ -28,6 +28,7 @@ class NumberParam extends Component {
           color="default"
           label={['high', 'low']}
           size='small'
+          disabled={this.props.disabled}
         />
         <label>{this.props.rightLabel}</label>
       </div>

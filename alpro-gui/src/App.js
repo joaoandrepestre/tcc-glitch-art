@@ -23,6 +23,8 @@ class App extends Component {
       sources: [],
 
       showNewProjectModal: false,
+
+      isReorderingEffects: false,
     };
   }
 
@@ -100,6 +102,7 @@ class App extends Component {
       activeEffects: [],
       sources: [],
       showNewProjectModal: false,
+      isReorderingEffects: false,
     });
   }
 
@@ -125,6 +128,7 @@ class App extends Component {
 
     this.setState({
       effectMetadatas: res.effects_metadatas,
+      isReorderingEffects: false,
     });
   }
 
@@ -232,6 +236,13 @@ class App extends Component {
     });
   }
 
+  startReordering = () => {
+    const { isReorderingEffects } = this.state;
+    this.setState({
+      isReorderingEffects: !isReorderingEffects,
+    });
+  }
+
   reorderEffects = (idx1, idx2) => {
     const metadatas = this.core.reorderEffects(idx1, idx2);
 
@@ -309,6 +320,7 @@ class App extends Component {
           // Effect
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
+          effectsDisabled={this.state.isReorderingEffects}
 
           // Stream
           streamCanvas={this.streamCanvas.bind(this)}
@@ -336,6 +348,8 @@ class App extends Component {
               activeEffects={this.state.activeEffects}
               changeActiveEffect={this.changeActiveEffect.bind(this)}
               reorderEffects={this.reorderEffects.bind(this)}
+              isDragging={this.state.isReorderingEffects}
+              startReordering={this.startReordering.bind(this)}
             />
           </Grid>
         </Grid>

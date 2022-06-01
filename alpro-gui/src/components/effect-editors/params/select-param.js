@@ -28,6 +28,7 @@ class SelectParam extends Component {
           onChange={this.setValue}
           size='small'
           style={{ float: 'left' }}
+          disabled={this.props.disabled}
         >
           {this.props.options.map((option, idx) => (
             <MenuItem key={idx} value={idx}>{option.toUpperCase()}</MenuItem>

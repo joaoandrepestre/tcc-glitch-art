@@ -10,7 +10,7 @@ class EffectDropdown extends Component {
 
   render() {
     return (
-      <NavDropdown title="Effect" id="basic-nav-dropdown">
+      <NavDropdown title="Effect" id="basic-nav-dropdown" disabled={this.props.disabled}>
         {this.props.registeredEffects.map(effect => {
           return (
             <NavDropdown.Item key={effect} onClick={this.addEffect(effect)}>

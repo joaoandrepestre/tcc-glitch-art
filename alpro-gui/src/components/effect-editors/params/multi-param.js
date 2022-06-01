@@ -41,6 +41,7 @@ class MultiParam extends Component {
                 value={v * 100}
                 valueLabelDisplay="auto"
                 onChange={this.setValue}
+                disabled={this.props.disabled}
               />
             </div>
           )
