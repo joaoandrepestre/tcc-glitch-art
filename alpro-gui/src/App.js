@@ -232,6 +232,14 @@ class App extends Component {
     });
   }
 
+  reorderEffects = (idx1, idx2) => {
+    const metadatas = this.core.reorderEffects(idx1, idx2);
+
+    this.setState({
+      effectMetadatas: metadatas,
+    });
+  }
+
   changeActiveEffect = (effectKey) => {
     const { activeEffects } = this.state;
 
@@ -327,6 +335,7 @@ class App extends Component {
               removeEffect={this.removeEffect.bind(this)}
               activeEffects={this.state.activeEffects}
               changeActiveEffect={this.changeActiveEffect.bind(this)}
+              reorderEffects={this.reorderEffects.bind(this)}
             />
           </Grid>
         </Grid>

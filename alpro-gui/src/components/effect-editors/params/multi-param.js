@@ -1,6 +1,5 @@
 import { Slider } from "@mui/material";
 import { Component } from "react";
-import { ListGroup } from "react-bootstrap";
 import { formatLabel } from "../../../utils";
 
 class MultiParam extends Component {

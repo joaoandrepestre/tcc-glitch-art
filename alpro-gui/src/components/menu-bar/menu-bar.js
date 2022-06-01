@@ -6,10 +6,6 @@ import FileDropdown from './file-dropdown';
 
 class MenuBar extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   changeProjectName = (e) => {
     this.props.changeProjectName(e.target.value);
   }

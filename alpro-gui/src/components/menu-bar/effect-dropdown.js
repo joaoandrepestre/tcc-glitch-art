@@ -4,10 +4,6 @@ import { firstLetterUpperCase } from "../../utils";
 
 class EffectDropdown extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   addEffect = (effect) => () => {
     this.props.addEffect(effect);
   }

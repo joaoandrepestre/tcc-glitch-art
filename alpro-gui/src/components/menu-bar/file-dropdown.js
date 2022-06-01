@@ -3,10 +3,6 @@ import { NavDropdown } from "react-bootstrap";
 
 class FileDropdown extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   newProject = () => {
     this.props.newProject();
   }

@@ -104,6 +104,10 @@ export default class Core {
     this.effectsChain.removeEffect(effectId);
   }
 
+  reorderEffects(index1: number, index2: number): EffectMetadata[] {
+    return this.effectsChain.reorderEffects(index1, index2);
+  }
+
   update(bgColor: createREGL.Vec4) {
     this.regl.frame(() => {
       this.regl.clear({

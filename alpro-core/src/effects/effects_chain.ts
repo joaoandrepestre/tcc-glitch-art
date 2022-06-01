@@ -146,6 +146,17 @@ export default class EffectsChain {
     this.defineReglCommand();
   }
 
+  reorderEffects(index1: number, index2: number): EffectMetadata[] {
+    const res = Array.from(this.fx_chain);
+    const [removed] = res.splice(index1, 1);
+    res.splice(index2, 0, removed);
+
+    this.fx_chain = res;
+    this.defineReglCommand();
+
+    return this.getMetadatas();
+  }
+
   reset(): void {
     this.fx_chain = [];
     this.nextId = 0;

@@ -1,11 +1,7 @@
-import { Card, CardContent, CardMedia, ImageList, ImageListItem, List, Typography } from "@mui/material";
+import { Card, CardContent, CardMedia } from "@mui/material";
 import { Component } from "react";
 
 class SourcesZone extends Component {
-
-  constructor(props) {
-    super(props);
-  }
 
   setSource = (source) => () => {
     this.props.setSource(source);
