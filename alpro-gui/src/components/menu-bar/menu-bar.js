@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Navbar, Container, Nav } from 'react-bootstrap';
 import EffectDropdown from './effect-dropdown';
 import FileDropdown from './file-dropdown';
+import InputStreamDropdown from './input-stream-dropdown';
 
 class MenuBar extends Component {
 
@@ -47,6 +48,10 @@ class MenuBar extends Component {
                 requestWebcam={this.props.requestWebcam}
 
                 exportPNG={this.props.exportPNG}
+              />
+              <InputStreamDropdown
+                inputDevices={this.props.inputDevices}
+                requestStream={this.props.requestStream}
               />
               <EffectDropdown
                 registeredEffects={this.props.registeredEffects}

@@ -15,17 +15,28 @@ class App extends Component {
     this.state = {
       width: 512,
       height: 512,
-      webcamStream: null,
+      inputStream: null,
       registeredEffects: [],
       effectMetadatas: [],
       activeEffects: [],
       projectName: '',
       sources: [],
-
+      inputDevices: [],
       showNewProjectModal: false,
 
       isReorderingEffects: false,
     };
+  }
+
+  defineInputDevices = () => {
+    if (!navigator.mediaDevices.enumerateDevices) return;
+
+    navigator.mediaDevices.enumerateDevices()
+      .then(devices => {
+        this.setState({
+          inputDevices: devices.filter(d => d.kind === 'videoinput'),
+        })
+      });
   }
 
   componentDidMount() {
@@ -34,17 +45,19 @@ class App extends Component {
     this.setState({
       registeredEffects: this.core.getRegisteredEffects(),
     })
+    this.defineInputDevices();
     this.core.update([0, 0, 0, 0.8]);
   }
 
-  getWebcamStream() {
-    if (this.state.webcamStream != null) return Promise.resolve(this.webcamStream);
-
+  getInputStream(deviceId) {
     if (navigator.mediaDevices.getUserMedia) {
-      return navigator.mediaDevices.getUserMedia({ video: true })
+      const constraint = {
+        video: deviceId === undefined ? true : { deviceId }
+      };
+      return navigator.mediaDevices.getUserMedia(constraint)
         .then(stream => {
           this.setState({
-            webcamStream: stream
+            inputStream: stream
           });
           return stream;
         })
@@ -52,12 +65,12 @@ class App extends Component {
     }
   }
 
-  stopWebcam() {
-    if (this.state.webcamStream == null) return;
+  stopInputStream() {
+    if (this.state.inputStream == null) return;
 
-    this.state.webcamStream.getTracks()[0].stop();
+    this.state.inputStream.getTracks()[0].stop();
     this.setState({
-      webcamStream: null,
+      inputStream: null,
     });
   }
 
@@ -94,7 +107,7 @@ class App extends Component {
 
   newProject = () => {
     this.core.resetState();
-    this.stopWebcam();
+    this.stopInputStream();
     this.setState({
       width: 512,
       height: 512,
@@ -117,11 +130,12 @@ class App extends Component {
 
     res.source_result
       .then(res => {
-        if (res === 'webcam-request') {
-          return this.getWebcamStream()
-            .then(stream => this.core.defineWebcamSource(stream));
+        if (res === 'webcam-request' || res === 'input-stream-request') {
+          const isWebcam = res === 'webcam-request';
+          return this.getInputStream()
+            .then(stream => this.core.defineInputStreamSource(stream, isWebcam));
         }
-        this.stopWebcam();
+        this.stopInputStream();
         return res;
       })
       .then(dim => this.resize(dim));
@@ -177,18 +191,18 @@ class App extends Component {
   updateImgURL(dataURL) {
     this.core.defineImageSource(dataURL)
       .then(dim => this.resize(dim));
-    this.stopWebcam();
+    this.stopInputStream();
   }
 
   updateVidURL(dataURL) {
     this.core.defineVideoSource(dataURL)
       .then(dim => this.resize(dim));
-    this.stopWebcam();
+    this.stopInputStream();
   }
 
-  requestWebcam() {
-    this.getWebcamStream()
-      .then(stream => this.core.defineWebcamSource(stream))
+  requestInputStream(deviceId, flipX = true) {
+    this.getInputStream(deviceId)
+      .then(stream => this.core.defineInputStreamSource(stream, flipX))
       .then(dim => this.resize(dim));
   }
 
@@ -313,16 +327,20 @@ class App extends Component {
           saveProject={this.saveProject.bind(this)}
 
           addSource={this.addSource.bind(this)}
-          requestWebcam={this.requestWebcam.bind(this)}
+          requestWebcam={this.requestInputStream.bind(this)}
 
           exportPNG={this.exportPNG.bind(this)}
+
+          // Input Stream
+          inputDevices={this.state.inputDevices}
+          requestStream={this.requestInputStream.bind(this)}
 
           // Effect
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
           effectsDisabled={this.state.isReorderingEffects}
 
-          // Stream
+          // Output Stream
           streamCanvas={this.streamCanvas.bind(this)}
         />
         <Grid container spacing={2} style={{ marginLeft: 10, marginTop: 10 }}>

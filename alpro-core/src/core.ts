@@ -70,13 +70,14 @@ export default class Core {
     return this.source.getDimensions();
   }
 
-  defineWebcamSource(stream: MediaStream): Promise<Dimensions> {
+  defineInputStreamSource(stream: MediaStream, isWebcam: boolean): Promise<Dimensions> {
     this.source.set(SourceType.UNSET, null);
     let data = document.createElement('video');
     data.muted = true;
     data.onloadeddata = () => {
-      this.source.set(SourceType.WEBCAM, data);
-      this.defineTexture(-1);
+      let srcType = isWebcam ? SourceType.WEBCAM : SourceType.INPUT_STREAM;
+      this.source.set(srcType, data);
+      this.defineTexture(srcType.flipX);
       data.play(); // maybe change ??
     };
     data.srcObject = stream;
@@ -140,6 +141,8 @@ export default class Core {
       case 'vid':
         source_result = this.defineVideoSource(s.data);
         break;
+      case 'input-stream':
+        source_result = Promise.resolve('input-stream-request');
       case 'webcam':
         source_result = Promise.resolve('webcam-request');
         break;

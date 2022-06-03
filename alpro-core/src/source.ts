@@ -17,13 +17,16 @@ export type ExportedSource = {
 export class SourceType {
   static IMG = new SourceType('img');
   static VID = new SourceType('vid');
-  static WEBCAM = new SourceType('webcam');
+  static WEBCAM = new SourceType('webcam', -1);
+  static INPUT_STREAM = new SourceType('input-stream');
   static UNSET = new SourceType(null);
 
   name: string;
+  flipX: number;
 
-  constructor(name) {
+  constructor(name: string, flipX: number = 1) {
     this.name = name;
+    this.flipX = flipX;
   }
 }
 
@@ -48,7 +51,7 @@ export class Source {
   }
 
   isVideo(): boolean {
-    return this.sourceType === SourceType.VID || this.sourceType === SourceType.WEBCAM;
+    return this.sourceType === SourceType.VID || this.sourceType === SourceType.WEBCAM || this.sourceType === SourceType.INPUT_STREAM;
   }
 
   isWebcam(): boolean {
