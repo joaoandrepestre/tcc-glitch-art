@@ -141,7 +141,7 @@ export class Effect {
 
   export(): ExportedEffect {
     return {
-      type: this.constructor.name.toLowerCase(),
+      type: this.type,
       id: this.id,
       params: this.exportParams(),
     };
