@@ -10,14 +10,16 @@ class InputStreamDropdown extends Component {
   render() {
     return (
       <NavDropdown title="Input Stream" id="basic-nav-dropdown">
-        {this.props.inputDevices.map((device, idx) => (
-          <NavDropdown.Item
+        {this.props.inputDevices.map((device, idx) => {
+          const flipX = device.label.toLowerCase().includes('webcam')
+            || device.label.toLowerCase().includes('front');
+          return <NavDropdown.Item
             key={idx}
-            onClick={this.requestStream(device.deviceId, device.label.toLowerCase().includes('webcam'))}
+            onClick={this.requestStream(device.deviceId, flipX)}
           >
             {`Open ${device.label}...`}
           </NavDropdown.Item>
-        ))}
+        })}
       </NavDropdown>
     );
   }
