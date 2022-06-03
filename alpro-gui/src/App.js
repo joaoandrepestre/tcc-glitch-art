@@ -22,6 +22,7 @@ class App extends Component {
       projectName: '',
       sources: [],
       inputDevices: [],
+      selectedDeviceId: null,
       showNewProjectModal: false,
 
       isReorderingEffects: false,
@@ -50,6 +51,13 @@ class App extends Component {
   }
 
   getInputStream(deviceId) {
+    this.stopInputStream();
+
+    const validIds = this.state.inputDevices.map(d => d.deviceId);
+    if (deviceId !== undefined && !validIds.includes(deviceId)) {
+      return Promise.reject("The selectd device does not exist or has changed its id.");
+    }
+
     if (navigator.mediaDevices.getUserMedia) {
       const constraint = {
         video: deviceId === undefined ? true : { deviceId }
@@ -57,7 +65,8 @@ class App extends Component {
       return navigator.mediaDevices.getUserMedia(constraint)
         .then(stream => {
           this.setState({
-            inputStream: stream
+            inputStream: stream,
+            selectedDeviceId: deviceId,
           });
           return stream;
         })
@@ -124,6 +133,7 @@ class App extends Component {
       projectName: json.projectName,
       activeEffects: json.activeEffects,
       sources: json.sources,
+      selectedDeviceId: json.deviceId,
     });
 
     let res = this.core.import(json.coreState);
@@ -132,8 +142,7 @@ class App extends Component {
       .then(res => {
         if (res === 'webcam-request' || res === 'input-stream-request') {
           const isWebcam = res === 'webcam-request';
-          return this.getInputStream()
-            .then(stream => this.core.defineInputStreamSource(stream, isWebcam));
+          return this.requestInputStream(json.deviceId, isWebcam);
         }
         this.stopInputStream();
         return res;
@@ -157,6 +166,7 @@ class App extends Component {
       projectName: name,
       activeEffects: this.state.activeEffects,
       sources: this.state.sources,
+      deviceId: this.state.selectedDeviceId,
       coreState,
     };
     let content = JSON.stringify(fullState);
@@ -203,7 +213,8 @@ class App extends Component {
   requestInputStream(deviceId, flipX = true) {
     this.getInputStream(deviceId)
       .then(stream => this.core.defineInputStreamSource(stream, flipX))
-      .then(dim => this.resize(dim));
+      .then(dim => this.resize(dim))
+      .catch(err => alert(err));
   }
 
   exportPNG() {
