@@ -7,14 +7,16 @@ import { Button, Modal } from 'react-bootstrap';
 import { Grid, TextField } from '@mui/material';
 import SourcesZone from './components/sources-zone/sources-zone';
 import { waitForCondition } from './utils';
+import Display from './components/display';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      width: 512,
-      height: 512,
+      textureWidth: 512,
+      textureHeight: 512,
+      windowWidth: null,
       inputStream: null,
       registeredEffects: [],
       effectMetadatas: [],
@@ -43,8 +45,14 @@ class App extends Component {
   componentDidMount() {
     this.canvas = document.getElementById('canvas');
     this.core = new Core(this.canvas);
+    window.onresize = e => {
+      this.setState({
+        windowWidth: e.target.innerWidth,
+      });
+    };
     this.setState({
       registeredEffects: this.core.getRegisteredEffects(),
+      windowWidth: window.innerWidth,
     })
     this.defineInputDevices();
     this.core.update([0, 0, 0, 0.8]);
@@ -102,8 +110,8 @@ class App extends Component {
     }
 
     this.setState({
-      width: w,
-      height: h,
+      textureWidth: w,
+      textureHeight: h,
     });
   }
 
@@ -362,11 +370,11 @@ class App extends Component {
             />
           </Grid>
           <Grid item>
-            <canvas
-              id="canvas"
-              width={this.state.width}
-              height={this.state.height}
-              style={{ float: 'left', marginLeft: 50, marginTop: 10 }}
+            <Display
+              textureWidth={this.state.textureWidth}
+              textureHeight={this.state.textureHeight}
+
+              displayWidth={this.state.windowWidth * 0.55}
             />
           </Grid>
           <Grid item>
