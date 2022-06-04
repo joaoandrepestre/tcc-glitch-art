@@ -65,7 +65,7 @@ class EffectEditor extends Component {
 
   render() {
     return (
-      <div style={{ marginBottom: 5 }}>
+      <div style={{ margin: 5 }}>
         <Toast show={this.state.show} onClose={this.close}>
           <Toast.Header
             style={{ cursor: "pointer" }}

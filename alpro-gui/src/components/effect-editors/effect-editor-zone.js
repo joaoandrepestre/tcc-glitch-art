@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { Accordion } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import EffectEditor from './effect-editor';
-import { Button } from '@mui/material';
+import { Button, Card } from '@mui/material';
 
 class EffectEditorZone extends Component {
 
@@ -26,7 +26,7 @@ class EffectEditorZone extends Component {
           {this.props.isDragging ? 'Done' : 'Reorder'}
         </Button>
         <br />
-        <div style={{ float: "left", width: window.innerWidth / 5, marginTop: 15 }}>
+        <Card variant='outlined' style={{ float: "right", width: this.props.width, height: this.props.height, overflowY: 'scroll' }}>
           <DragDropContext onDragEnd={this.onDragEnd} direction='vertical'>
             <Droppable droppableId='effects-zone'>
               {(provided, snapshot) => (
@@ -67,7 +67,7 @@ class EffectEditorZone extends Component {
               )}
             </Droppable>
           </DragDropContext>
-        </div>
+        </Card>
       </div>
     );
   }

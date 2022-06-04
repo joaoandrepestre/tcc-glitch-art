@@ -9,9 +9,10 @@ class SourcesZone extends Component {
 
   render() {
     return (
-      <div>
+      <div style={{ marginLeft: 10 }}>
         <strong className="me-auto" style={{ float: "left" }}>Files</strong><br />
-        <Card variant='outlined' style={{ width: window.innerWidth / 5, height: 512, overflowY: "scroll" }}>
+        <br />
+        <Card variant='outlined' style={{ float: 'left', width: this.props.width, height: this.props.height, overflowY: "scroll" }}>
           {
             this.props.sources.map((source, idx) =>
               <Card key={idx} sx={{ maxWidth: 100, maxHeight: 150, margin: 1, float: 'left', cursor: "pointer" }} onClick={this.setSource(source)}>

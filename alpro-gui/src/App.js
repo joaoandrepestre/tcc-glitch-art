@@ -17,6 +17,7 @@ class App extends Component {
       textureWidth: 512,
       textureHeight: 512,
       windowWidth: null,
+      windowHeight: null,
       inputStream: null,
       registeredEffects: [],
       effectMetadatas: [],
@@ -59,6 +60,7 @@ class App extends Component {
     this.setState({
       registeredEffects: this.core.getRegisteredEffects(),
       windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight - 61,
     })
     this.defineInputDevices();
     this.core.update([0, 0, 0, 0.8]);
@@ -351,9 +353,13 @@ class App extends Component {
           addEffect={this.addEffect.bind(this)}
           effectsDisabled={this.state.isReorderingEffects || !this.isSourceLoaded()}
         />
-        <Grid container spacing={2} style={{ marginLeft: 10, marginTop: 10 }}>
+        <Grid container spacing={2} style={{ marginTop: 10 }}>
           <Grid item>
             <SourcesZone
+
+              width={this.state.windowWidth * 0.20 - 5}
+              height={this.state.windowHeight * 0.80}
+
               sources={this.state.sources}
               setSource={this.setSource.bind(this)}
             />
@@ -371,6 +377,9 @@ class App extends Component {
           </Grid>
           <Grid item>
             <EffectEditorZone
+              width={this.state.windowWidth * 0.20 - 5}
+              height={this.state.windowHeight * 0.8}
+
               metadatas={this.state.effectMetadatas}
               editEffect={this.editEffect.bind(this)}
               removeEffect={this.removeEffect.bind(this)}
