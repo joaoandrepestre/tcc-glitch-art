@@ -31,6 +31,12 @@ class App extends Component {
     };
   }
 
+  isSourceLoaded = () => {
+    if (!this.core) return false;
+
+    return this.core.sourceLoaded();
+  }
+
   defineInputDevices = () => {
     if (!navigator.mediaDevices.enumerateDevices) return;
 
@@ -92,26 +98,9 @@ class App extends Component {
   }
 
   resize(dimensions) {
-    let w = dimensions.width;
-    let h = dimensions.height;
-    const maxW = window.innerWidth;
-    const maxH = window.innerHeight;
-
-    if (w > h) {
-      if (w > maxW) {
-        h = h * (maxW / w);
-        w = maxW;
-      }
-    } else {
-      if (h > maxH) {
-        w = w * (maxH / h);
-        h = maxH;
-      }
-    }
-
     this.setState({
-      textureWidth: w,
-      textureHeight: h,
+      textureWidth: dimensions.width,
+      textureHeight: dimensions.height,
     });
   }
 
@@ -226,10 +215,13 @@ class App extends Component {
   }
 
   exportPNG() {
-    if (!this.core.sourceLoaded() || !this.core.modified()) return;
+    if (!this.core.sourceLoaded()) return;
+
+    const { projectName } = this.state;
+    let name = projectName ? projectName : 'output_image';
 
     let link = document.createElement('a');
-    link.download = 'output_image.png';
+    link.download = `${name}.png`;
     link.href = this.canvas.toDataURL('image/png');
     link.click();
   }
@@ -357,10 +349,7 @@ class App extends Component {
           // Effect
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
-          effectsDisabled={this.state.isReorderingEffects}
-
-          // Output Stream
-          streamCanvas={this.streamCanvas.bind(this)}
+          effectsDisabled={this.state.isReorderingEffects || !this.isSourceLoaded()}
         />
         <Grid container spacing={2} style={{ marginLeft: 10, marginTop: 10 }}>
           <Grid item>
@@ -375,6 +364,9 @@ class App extends Component {
               textureHeight={this.state.textureHeight}
 
               displayWidth={this.state.windowWidth * 0.55}
+
+              enableButtons={this.isSourceLoaded()}
+              saveImage={this.exportPNG.bind(this)}
             />
           </Grid>
           <Grid item>

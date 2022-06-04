@@ -23,7 +23,7 @@ class FileDropdown extends Component {
   openImage = () => {
     let image_input = document.createElement('input');
     image_input.type = 'file';
-    image_input.accept = 'image/png, image/jpg';
+    image_input.accept = 'image/png,image/jpeg';
     image_input.hidden = true;
     image_input.onchange = this.processFile;
     image_input.click();

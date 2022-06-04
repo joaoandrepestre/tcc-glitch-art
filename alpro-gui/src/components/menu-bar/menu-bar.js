@@ -15,7 +15,7 @@ class MenuBar extends Component {
     let textWidth = this.props.projectName.length * 8.5;
     textWidth = textWidth > 100 ? textWidth : 100;
     return (
-      < Navbar bg="light" expand="lg" >
+      < Navbar bg="light" expand="lg">
         <Container>
           <Navbar.Brand>
             <img
@@ -58,7 +58,6 @@ class MenuBar extends Component {
                 addEffect={this.props.addEffect}
                 disabled={this.props.effectsDisabled}
               />
-              <Nav.Link onClick={this.props.streamCanvas}>Stream</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
