@@ -157,7 +157,7 @@ class App extends Component {
       height: 512,
       effectMetadatas: [],
 
-      projectState: ProjectState.newProject(),
+      projectState: ProjectState.newProject(name),
 
       showNewProjectModal: false,
       isReorderingEffects: false,
