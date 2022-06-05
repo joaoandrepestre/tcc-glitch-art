@@ -93,6 +93,14 @@ export default class Core {
     return this.effectsChain.getMetadatas();
   }
 
+  getExportedSource() {
+    return this.source.export();
+  }
+
+  getExportedEffects() {
+    return this.effectsChain.export();
+  }
+
   addEffect(effectType: string): EffectMetadata {
     return this.effectsChain.addEffect(effectType); // SHOULD RETURN NEW EFFECT's METADATA
   }

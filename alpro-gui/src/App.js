@@ -6,8 +6,13 @@ import EffectEditorZone from './components/effect-editors/effect-editor-zone';
 import { Button, Modal } from 'react-bootstrap';
 import { Grid, TextField } from '@mui/material';
 import SourcesZone from './components/sources-zone/sources-zone';
-import { waitForCondition } from './utils';
+import { getCookie, setCookie } from './utils';
 import Display from './components/display';
+import ProjectState from './models/project-state';
+
+
+const COOKIE_KEY_ACCESS = 'accessed';
+const COOKIE_EXPIRATION_ACCESS = 100;
 
 class App extends Component {
 
@@ -18,16 +23,15 @@ class App extends Component {
       textureHeight: 512,
       windowWidth: null,
       windowHeight: null,
+
       inputStream: null,
       registeredEffects: [],
       effectMetadatas: [],
-      activeEffects: [],
-      projectName: '',
-      sources: [],
       inputDevices: [],
-      selectedDeviceId: null,
-      showNewProjectModal: false,
 
+      projectState: new ProjectState(),
+
+      showNewProjectModal: false,
       isReorderingEffects: false,
     };
   }
@@ -41,7 +45,7 @@ class App extends Component {
   defineInputDevices = () => {
     if (!navigator.mediaDevices.enumerateDevices) return;
 
-    navigator.mediaDevices.enumerateDevices()
+    return navigator.mediaDevices.enumerateDevices()
       .then(devices => {
         this.setState({
           inputDevices: devices.filter(d => d.kind === 'videoinput'),
@@ -52,21 +56,44 @@ class App extends Component {
   componentDidMount() {
     this.canvas = document.getElementById('canvas');
     this.core = new Core(this.canvas);
+
     window.onresize = e => {
       this.setState({
         windowWidth: e.target.innerWidth,
+        windowHeight: window.innerHeight - 61,
       });
     };
+
     this.setState({
       registeredEffects: this.core.getRegisteredEffects(),
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight - 61,
     })
-    this.defineInputDevices();
+    this.defineInputDevices()
+      .then(this.checkCookies);
     this.core.update([0, 0, 0, 0.8]);
   }
 
+  loadFromStorage = () => {
+    const str = localStorage.getItem(ProjectState.STORAGE_KEY_PROJECT);
+    if (str !== null) {
+      const json = JSON.parse(str);
+      this.updateProjectJSON(json);
+    }
+  };
+
+  checkCookies = () => {
+    this.loadFromStorage();
+    const accessed = getCookie(COOKIE_KEY_ACCESS);
+
+    if (accessed === "" || accessed !== 'true') {
+      // show tutorial
+      setCookie(COOKIE_KEY_ACCESS, true, COOKIE_EXPIRATION_ACCESS);
+    }
+  }
+
   getInputStream(deviceId) {
+    const { projectState } = this.state;
     this.stopInputStream();
 
     const validIds = this.state.inputDevices.map(d => d.deviceId);
@@ -80,9 +107,10 @@ class App extends Component {
       };
       return navigator.mediaDevices.getUserMedia(constraint)
         .then(stream => {
+          projectState.setDeviceId(deviceId);
           this.setState({
             inputStream: stream,
-            selectedDeviceId: deviceId,
+            projectState
           });
           return stream;
         })
@@ -93,9 +121,13 @@ class App extends Component {
   stopInputStream() {
     if (this.state.inputStream == null) return;
 
+    const { projectState } = this.state;
+
     this.state.inputStream.getTracks()[0].stop();
+    projectState.setDeviceId(null);
     this.setState({
       inputStream: null,
+      projectState,
     });
   }
 
@@ -107,33 +139,34 @@ class App extends Component {
   }
 
   showNewProjectModal = () => {
+    const { projectState } = this.state;
+    projectState.updateName("");
     this.setState({
-      projectName: '',
+      projectState,
       showNewProjectModal: true,
     });
   }
 
   newProject = () => {
+    const { projectState } = this.state;
+    const name = projectState.name;
     this.core.resetState();
     this.stopInputStream();
     this.setState({
       width: 512,
       height: 512,
       effectMetadatas: [],
-      activeEffects: [],
-      sources: [],
+
+      projectState: ProjectState.newProject(),
+
       showNewProjectModal: false,
       isReorderingEffects: false,
     });
   }
 
   updateProjectJSON(json) {
-    this.setState({
-      projectName: json.projectName,
-      activeEffects: json.activeEffects,
-      sources: json.sources,
-      selectedDeviceId: json.deviceId,
-    });
+    const { projectState } = this.state;
+    projectState.loadFromJSON(json);
 
     let res = this.core.import(json.coreState);
 
@@ -149,6 +182,7 @@ class App extends Component {
       .then(dim => this.resize(dim));
 
     this.setState({
+      projectState,
       effectMetadatas: res.effects_metadatas,
       isReorderingEffects: false,
     });
@@ -157,36 +191,30 @@ class App extends Component {
   saveProject() {
     if (!this.core.sourceLoaded() || !this.core.modified()) return;
 
-    const { projectName } = this.state;
-    let name = projectName ? projectName : 'project';
+    const { projectState } = this.state;
 
-    let coreState = this.core.export();
-    let fullState = {
-      projectName: name,
-      activeEffects: this.state.activeEffects,
-      sources: this.state.sources,
-      deviceId: this.state.selectedDeviceId,
-      coreState,
-    };
-    let content = JSON.stringify(fullState);
+    const projectName = projectState.name;
+    let name = projectName ? projectName : 'project';
 
     let link = document.createElement('a');
     link.download = name + '.alpro';
-    link.href = `data:text/json;charset=utf-8,${encodeURI(content)}`;
+    link.href = `data:text/json;charset=utf-8,${encodeURI(JSON.stringify(projectState))}`;
     link.click();
   }
 
   changeProjectName = (projectName) => {
+    const { projectState } = this.state;
+    projectState.updateName(projectName);
     this.setState({
-      projectName,
+      projectState,
     });
   }
 
   addSource = (source) => {
-    const { sources } = this.state;
-    sources.push(source);
+    const { projectState } = this.state;
+    projectState.addSource(source);
     this.setState({
-      sources,
+      projectState,
     });
 
     if (!this.core.sourceLoaded()) this.setSource(source);
@@ -198,29 +226,52 @@ class App extends Component {
   }
 
   updateImgURL(dataURL) {
+    const { projectState } = this.state;
     this.core.defineImageSource(dataURL)
-      .then(dim => this.resize(dim));
+      .then(dim => {
+        this.resize(dim);
+        projectState.updateCoreSource(this.core.getExportedSource());
+        this.setState({
+          projectState,
+        });
+      });
     this.stopInputStream();
   }
 
   updateVidURL(dataURL) {
+    const { projectState } = this.state;
+
     this.core.defineVideoSource(dataURL)
-      .then(dim => this.resize(dim));
+      .then(dim => {
+        this.resize(dim);
+        projectState.updateCoreSource(this.core.getExportedSource());
+        this.setState({
+          projectState,
+        });
+      });
     this.stopInputStream();
   }
 
   requestInputStream(deviceId, flipX = true) {
+    const { projectState } = this.state;
+
     this.getInputStream(deviceId)
       .then(stream => this.core.defineInputStreamSource(stream, flipX))
-      .then(dim => this.resize(dim))
+      .then(dim => {
+        this.resize(dim);
+        projectState.updateCoreSource(this.core.getExportedSource());
+        this.setState({
+          projectState,
+        });
+      })
       .catch(err => alert(err));
   }
 
   exportPNG() {
     if (!this.core.sourceLoaded()) return;
 
-    const { projectName } = this.state;
-    let name = projectName ? projectName : 'output_image';
+    const { projectState } = this.state;
+    let name = projectState.name ? projectState.name : 'output_image';
 
     let link = document.createElement('a');
     link.download = `${name}.png`;
@@ -229,37 +280,42 @@ class App extends Component {
   }
 
   addEffect = (effectType) => {
-    const { effectMetadatas } = this.state;
+    const { effectMetadatas, projectState } = this.state;
 
     let metadata = this.core.addEffect(effectType);
     effectMetadatas.push(metadata);
+    projectState.updateCoreEffects(this.core.getExportedEffects());
 
     this.setState({
       effectMetadatas: effectMetadatas,
+      projectState,
     });
 
     this.changeActiveEffect(metadata.id);
   }
 
   editEffect = (id) => (params) => {
+    const { projectState } = this.state;
+
     this.core.editEffect(id, params);
+    projectState.updateCoreEffects(this.core.getExportedEffects());
     this.setState({
       effectMetadatas: this.core.getEffectMetadatas(),
+      projectState,
     });
   }
 
   removeEffect = (id) => () => {
-    const { activeEffects } = this.state;
+    const { projectState } = this.state;
 
     this.core.removeEffect(id);
+    projectState.updateCoreEffects(this.core.getExportedEffects());
 
-    let key = id.toString();
-    let idx = activeEffects.findIndex(e => e === key);
-    if (idx !== -1) activeEffects.splice(idx, 1);
+    projectState.removeActiveEffect(id);
 
     this.setState({
       effectMetadatas: this.core.getEffectMetadatas(),
-      activeEffects: activeEffects,
+      projectState,
     });
   }
 
@@ -271,67 +327,39 @@ class App extends Component {
   }
 
   reorderEffects = (idx1, idx2) => {
+    const { projectState } = this.state;
+
     const metadatas = this.core.reorderEffects(idx1, idx2);
+
+    projectState.updateCoreEffects(this.core.getExportedEffects());
 
     this.setState({
       effectMetadatas: metadatas,
+      projectState,
     });
   }
 
   changeActiveEffect = (effectKey) => {
-    const { activeEffects } = this.state;
+    const { projectState } = this.state;
 
-    let key = effectKey.toString();
-    let idx = activeEffects.findIndex(e => e === key);
-    if (idx === -1) activeEffects.push(key);
-    else activeEffects.splice(idx, 1);
+    projectState.toggleActiveEffect(effectKey);
 
     this.setState({
-      activeEffects: activeEffects,
+      projectState,
     });
   }
 
-  streamCanvas = () => {
-    const { width, height } = this.state;
-    const stream = this.canvas.captureStream();
-
-    const dxy = 5;
-    const newWindow = window.open("", "_blank",
-      `innerWidth=${width + dxy},innerHeight=${height + dxy},
-    resizable=yes,scrollbars=no,location=no,toolbar=no,popup=yes`);
-    waitForCondition(() => newWindow !== null, () => newWindow)
-      .then(w => {
-        w.document.body.style.backgroundColor = "black";
-        let vid = w.document.createElement('video');
-        vid.style.position = 'absolute';
-        vid.style.marginTop = `-${dxy}px`;
-        vid.style.marginLeft = `-${dxy}px`;
-        vid.width = width;
-        vid.height = height;
-        vid.srcObject = stream;
-        vid.muted = true;
-        vid.onloadedmetadata = () => {
-          w.document.body.appendChild(vid);
-          vid.play();
-        };
-        vid.load();
-        w.onresize = e => {
-          vid.width = e.target.innerWidth - dxy;
-          vid.height = e.target.innerHeight - dxy;
-        };
-      });
-
-  }
-
   render() {
-    let textWidth = this.state.projectName.length * 8.5;
+    const { projectState } = this.state;
+
+    let textWidth = projectState.name.length * 8.5;
     textWidth = textWidth > 100 ? textWidth : 100;
 
     return (
       <div className="App">
         <MenuBar
           // ProjectName
-          projectName={this.state.projectName}
+          projectName={projectState.name}
           changeProjectName={this.changeProjectName.bind(this)}
 
           // File
@@ -360,7 +388,7 @@ class App extends Component {
               width={this.state.windowWidth * 0.20 - 5}
               height={this.state.windowHeight * 0.80}
 
-              sources={this.state.sources}
+              sources={projectState.sources}
               setSource={this.setSource.bind(this)}
             />
           </Grid>
@@ -383,7 +411,7 @@ class App extends Component {
               metadatas={this.state.effectMetadatas}
               editEffect={this.editEffect.bind(this)}
               removeEffect={this.removeEffect.bind(this)}
-              activeEffects={this.state.activeEffects}
+              activeEffects={projectState.activeEffects}
               changeActiveEffect={this.changeActiveEffect.bind(this)}
               reorderEffects={this.reorderEffects.bind(this)}
               isDragging={this.state.isReorderingEffects}
@@ -409,10 +437,10 @@ class App extends Component {
               size='small'
               style={{ width: textWidth, maxWidth: 200 }}
               variant='standard'
-              value={this.state.projectName}
+              value={projectState.name}
               onChange={(e) => this.changeProjectName(e.target.value)}
               onKeyUp={(e) => { if (e.key === 'Enter') this.newProject() }}
-            /> {this.state.projectName ? '.alpro' : ' '}
+            /> {projectState.name ? '.alpro' : ' '}
           </Modal.Body>
           <Modal.Footer>
             <Button variant='primary' onClick={this.newProject}>Ok</Button>
