@@ -37,6 +37,7 @@ class App extends Component {
       showInitModal: false,
 
       isReorderingEffects: false,
+      isSourceLoaded: false,
     };
   }
 
@@ -166,6 +167,7 @@ class App extends Component {
       showInitModal: false,
 
       isReorderingEffects: false,
+      isSourceLoaded: false,
     });
   }
 
@@ -182,6 +184,15 @@ class App extends Component {
         }
         this.stopInputStream();
         return res;
+      })
+      .then(dim => {
+        this.resize(dim);
+        let { projectState } = this.state;
+        projectState.updateCoreSource(this.core.getExportedSource());
+        this.setState({
+          projectState,
+          isSourceLoaded: this.isSourceLoaded(),
+        });
       });
 
     this.setState({
@@ -237,6 +248,7 @@ class App extends Component {
         projectState.updateCoreSource(this.core.getExportedSource());
         this.setState({
           projectState,
+          isSourceLoaded: this.isSourceLoaded(),
         });
       });
     this.stopInputStream();
@@ -251,6 +263,7 @@ class App extends Component {
         projectState.updateCoreSource(this.core.getExportedSource());
         this.setState({
           projectState,
+          isSourceLoaded: this.isSourceLoaded(),
         });
       });
     this.stopInputStream();
@@ -266,6 +279,7 @@ class App extends Component {
         projectState.updateCoreSource(this.core.getExportedSource());
         this.setState({
           projectState,
+          isSourceLoaded: this.isSourceLoaded(),
         });
       })
       .catch(err => alert(err));
@@ -380,7 +394,7 @@ class App extends Component {
           // Effect
           registeredEffects={this.state.registeredEffects}
           addEffect={this.addEffect.bind(this)}
-          effectsDisabled={this.state.isReorderingEffects || !this.isSourceLoaded()}
+          effectsDisabled={this.state.isReorderingEffects || !this.state.isSourceLoaded}
         />
         <Grid container spacing={2} style={{ marginTop: 10 }}>
           <Grid item>
