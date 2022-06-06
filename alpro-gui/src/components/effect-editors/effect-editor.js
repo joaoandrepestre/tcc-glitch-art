@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { Accordion, ListGroup, Toast } from "react-bootstrap";
-import { firstLetterUpperCase } from "../../utils";
+import { firstLetterUpperCase } from "../../utils/string-utils";
 import { Switch } from '@mui/material';
 import MultiParam from "./params/multi-param";
 import NumberParam from "./params/number-param";

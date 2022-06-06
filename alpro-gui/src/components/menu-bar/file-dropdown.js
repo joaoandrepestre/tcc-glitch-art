@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { NavDropdown } from "react-bootstrap";
+import { loadProject, openImage, openVideo } from "../../utils/file-utils";
 
 class FileDropdown extends Component {
 
@@ -7,35 +8,8 @@ class FileDropdown extends Component {
     this.props.newProject();
   }
 
-  loadProject = () => {
-    let project_input = document.createElement('input');
-    project_input.type = 'file';
-    project_input.accept = '.alpro';
-    project_input.hidden = true;
-    project_input.onchange = this.processProjectFile;
-    project_input.click();
-  }
-
   saveProject = () => {
     this.props.saveProject();
-  }
-
-  openImage = () => {
-    let image_input = document.createElement('input');
-    image_input.type = 'file';
-    image_input.accept = 'image/png,image/jpeg';
-    image_input.hidden = true;
-    image_input.onchange = this.processFile;
-    image_input.click();
-  }
-
-  openVideo = () => {
-    let video_input = document.createElement('input');
-    video_input.type = 'file';
-    video_input.accept = 'video/*';
-    video_input.hidden = true;
-    video_input.onchange = this.processFile;
-    video_input.click();
   }
 
   openWebcam = () => {
@@ -84,11 +58,11 @@ class FileDropdown extends Component {
     return (
       <NavDropdown title="File" id="basic-nav-dropdown">
         <NavDropdown.Item onClick={this.newProject}>New Project</NavDropdown.Item>
-        <NavDropdown.Item onClick={this.loadProject}>Load Project...</NavDropdown.Item>
+        <NavDropdown.Item onClick={loadProject(this.props.updateProjectJSON)}>Load Project...</NavDropdown.Item>
         <NavDropdown.Item onClick={this.saveProject}>Save Project</NavDropdown.Item>
         <NavDropdown.Divider />
-        <NavDropdown.Item onClick={this.openImage}>Open Image...</NavDropdown.Item>
-        <NavDropdown.Item onClick={this.openVideo}>Open Video...</NavDropdown.Item>
+        <NavDropdown.Item onClick={openImage(this.props.addSource)}>Open Image...</NavDropdown.Item>
+        <NavDropdown.Item onClick={openVideo(this.props.addSource)}>Open Video...</NavDropdown.Item>
         <NavDropdown.Item onClick={this.openWebcam}>Open Webcam...</NavDropdown.Item>
         <NavDropdown.Divider />
         <NavDropdown.Item onClick={this.exportPNG}>Export as PNG</NavDropdown.Item>

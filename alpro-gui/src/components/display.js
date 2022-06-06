@@ -1,7 +1,8 @@
 import { Fab } from "@mui/material";
 import { Component } from "react";
-import { round2Decimals, waitForCondition } from "../utils";
 import { CameraAlt, OpenInNew } from '@mui/icons-material'
+import { round2Decimals } from "../utils/number-utils";
+import { waitForCondition } from '../utils/time-utils';
 
 class Display extends Component {
 

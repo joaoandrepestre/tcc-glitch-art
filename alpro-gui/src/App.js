@@ -3,12 +3,14 @@ import './App.css';
 import Core from 'alpro-core';
 import MenuBar from './components/menu-bar/menu-bar';
 import EffectEditorZone from './components/effect-editors/effect-editor-zone';
-import { Button, Modal } from 'react-bootstrap';
-import { Grid, TextField } from '@mui/material';
+import { Grid } from '@mui/material';
 import SourcesZone from './components/sources-zone/sources-zone';
-import { getCookie, setCookie } from './utils';
+import { getCookie, setCookie } from './utils/cookie-utils';
 import Display from './components/display';
 import ProjectState from './models/project-state';
+import NewProjectModal from './components/modals/new-project-modal';
+import InitModal from './components/modals/init-modal';
+import './utils/object-utils'; // define Object.id function
 
 
 const COOKIE_KEY_ACCESS = 'accessed';
@@ -32,6 +34,8 @@ class App extends Component {
       projectState: new ProjectState(),
 
       showNewProjectModal: false,
+      showInitModal: false,
+
       isReorderingEffects: false,
     };
   }
@@ -75,10 +79,14 @@ class App extends Component {
   }
 
   loadFromStorage = () => {
-    const str = localStorage.getItem(ProjectState.STORAGE_KEY_PROJECT);
+    const str = sessionStorage.getItem(ProjectState.STORAGE_KEY_PROJECT);
     if (str !== null) {
       const json = JSON.parse(str);
       this.updateProjectJSON(json);
+    } else {
+      this.setState({
+        showInitModal: true,
+      });
     }
   };
 
@@ -139,17 +147,12 @@ class App extends Component {
   }
 
   showNewProjectModal = () => {
-    const { projectState } = this.state;
-    projectState.updateName("");
     this.setState({
-      projectState,
       showNewProjectModal: true,
     });
   }
 
-  newProject = () => {
-    const { projectState } = this.state;
-    const name = projectState.name;
+  newProject = (name) => {
     this.core.resetState();
     this.stopInputStream();
     this.setState({
@@ -160,13 +163,14 @@ class App extends Component {
       projectState: ProjectState.newProject(name),
 
       showNewProjectModal: false,
+      showInitModal: false,
+
       isReorderingEffects: false,
     });
   }
 
-  updateProjectJSON(json) {
-    const { projectState } = this.state;
-    projectState.loadFromJSON(json);
+  updateProjectJSON = (json) => {
+    const proj = ProjectState.loadProject(json);
 
     let res = this.core.import(json.coreState);
 
@@ -178,13 +182,13 @@ class App extends Component {
         }
         this.stopInputStream();
         return res;
-      })
-      .then(dim => this.resize(dim));
+      });
 
     this.setState({
-      projectState,
+      projectState: proj,
       effectMetadatas: res.effects_metadatas,
       isReorderingEffects: false,
+      showInitModal: false,
     });
   }
 
@@ -352,9 +356,6 @@ class App extends Component {
   render() {
     const { projectState } = this.state;
 
-    let textWidth = projectState.name.length * 8.5;
-    textWidth = textWidth > 100 ? textWidth : 100;
-
     return (
       <div className="App">
         <MenuBar
@@ -402,6 +403,7 @@ class App extends Component {
               enableButtons={this.isSourceLoaded()}
               saveImage={this.exportPNG.bind(this)}
             />
+
           </Grid>
           <Grid item>
             <EffectEditorZone
@@ -420,33 +422,17 @@ class App extends Component {
           </Grid>
         </Grid>
 
-
-
-        {/*New Project Modal*/}
-        <Modal
+        {/*Modals*/}
+        <NewProjectModal
           show={this.state.showNewProjectModal}
-          backdrop="static"
-          keyboard={false}
-        >
-          <Modal.Header>
-            <Modal.Title>New Project</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <TextField
-              label="Project Name"
-              size='small'
-              style={{ width: textWidth, maxWidth: 200 }}
-              variant='standard'
-              value={projectState.name}
-              onChange={(e) => this.changeProjectName(e.target.value)}
-              onKeyUp={(e) => { if (e.key === 'Enter') this.newProject() }}
-            /> {projectState.name ? '.alpro' : ' '}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant='primary' onClick={this.newProject}>Ok</Button>
-          </Modal.Footer>
+          newProject={this.newProject}
+        />
 
-        </Modal>
+        <InitModal
+          show={this.state.showInitModal}
+          newProject={this.newProject}
+          updateProjectJSON={this.updateProjectJSON}
+        />
       </div>
     );
   }

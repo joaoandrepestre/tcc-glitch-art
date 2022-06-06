@@ -1,6 +1,6 @@
 import { Slider } from "@mui/material";
 import { Component } from "react";
-import { formatLabel } from "../../../utils";
+import { formatLabel } from "../../../utils/string-utils";
 
 class MultiParam extends Component {
 

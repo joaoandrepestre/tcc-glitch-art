@@ -154,6 +154,11 @@ export default class Core {
       case 'webcam':
         source_result = Promise.resolve('webcam-request');
         break;
+      case null:
+      case 'unset':
+      case 'null':
+        source_result = Promise.resolve({ width: 512, height: 512 });
+        break;
       default:
         throw new Error('Invalid or unsupported source');
     }

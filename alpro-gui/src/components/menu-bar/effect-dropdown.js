@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { NavDropdown } from "react-bootstrap";
-import { firstLetterUpperCase } from "../../utils";
+import { firstLetterUpperCase } from "../../utils/string-utils";
 
 class EffectDropdown extends Component {
 

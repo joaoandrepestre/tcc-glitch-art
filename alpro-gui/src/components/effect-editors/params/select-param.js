@@ -1,6 +1,6 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { Component } from "react";
-import { formatLabel } from "../../../utils";
+import { formatLabel } from "../../../utils/string-utils";
 
 class SelectParam extends Component {
 
