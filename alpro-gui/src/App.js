@@ -211,9 +211,10 @@ class App extends Component {
     const projectName = projectState.name;
     let name = projectName ? projectName : 'project';
 
+    let content = projectState.exportFullState();
     let link = document.createElement('a');
     link.download = name + '.alpro';
-    link.href = `data:text/json;charset=utf-8,${encodeURI(JSON.stringify(projectState))}`;
+    link.href = `data:text/json;charset=utf-8,${encodeURI(JSON.stringify(content))}`;
     link.click();
   }
 

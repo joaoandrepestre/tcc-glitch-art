@@ -1,3 +1,5 @@
+import { getFileFromIndex, updateFileIndex } from "../utils/file-utils";
+
 class CoreState {
   constructor() {
     this.source = { type: null, data: null };
@@ -63,7 +65,7 @@ class ProjectState {
     this.activeEffects = [];
     this.coreState = new CoreState();
     this.name = name ? name : "";
-    this.sources = [];
+    this.sources = {};
     this.deviceId = null;
   }
 
@@ -162,14 +164,38 @@ class ProjectState {
     this.autoSave();
   }
 
+  saveSourcesToIndex(srcs) {
+    let sources = {};
+
+    srcs.forEach(src => {
+      let hash = updateFileIndex(src.data);
+      sources[hash] = {
+        hash,
+        name: src.name,
+        type: src.type,
+      };
+    });
+
+    return sources;
+  }
+
   setSources(srcs) {
-    this.sources = srcs;
+    let tmp = srcs;
+
+    if (Array.isArray(srcs)) { // check if the sources have dataurl in it somehow
+      tmp = this.saveSourcesToIndex(srcs);
+    }
+    // srcs from saved project has dataurls
+    //   save all to index
+    //   trasnform srcs to have index and not data url
+    this.sources = tmp;
 
     this.autoSave();
   }
 
   addSource(src) {
-    this.sources.push(src);
+    const { hash } = src;
+    this.sources[hash] = src;
 
     this.autoSave();
   }
@@ -178,6 +204,17 @@ class ProjectState {
     this.deviceId = id;
 
     this.autoSave();
+  }
+
+  getSourcesFromIndex() {
+    return Object.values(this.sources)
+      .map(src => {
+        return { ...src, data: getFileFromIndex(src.hash) }
+      });
+  }
+
+  exportFullState() {
+    return { ...this, sources: this.getSourcesFromIndex() };
   }
 
 }
