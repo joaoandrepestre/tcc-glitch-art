@@ -11,6 +11,8 @@ import ProjectState from './models/project-state';
 import NewProjectModal from './components/modals/new-project-modal';
 import InitModal from './components/modals/init-modal';
 import './utils/object-utils'; // define Object.id function
+import { getSessionStorageValue } from './utils/storage-utils';
+import { getFileFromIndex } from './utils/file-utils';
 
 
 const COOKIE_KEY_ACCESS = 'accessed';
@@ -80,10 +82,9 @@ class App extends Component {
   }
 
   loadFromStorage = () => {
-    const str = sessionStorage.getItem(ProjectState.STORAGE_KEY_PROJECT);
-    if (str !== null) {
-      const json = JSON.parse(str);
-      this.updateProjectJSON(json);
+    const project = getSessionStorageValue(ProjectState.STORAGE_KEY_PROJECT);
+    if (project !== {}) {
+      this.updateProjectJSON(project);
     } else {
       this.setState({
         showInitModal: true,
@@ -237,8 +238,9 @@ class App extends Component {
   }
 
   setSource = (source) => {
-    if (source.type === 'img') this.updateImgURL(source.data);
-    if (source.type === 'video') this.updateVidURL(source.data);
+    const data = getFileFromIndex(source.hash);
+    if (source.type === 'img') this.updateImgURL(data);
+    if (source.type === 'video') this.updateVidURL(data);
   }
 
   updateImgURL(dataURL) {

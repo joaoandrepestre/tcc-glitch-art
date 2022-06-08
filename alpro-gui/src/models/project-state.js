@@ -1,4 +1,5 @@
 import { getFileFromIndex, updateFileIndex } from "../utils/file-utils";
+import { getLocalStorageIndex, updateLocalStorageIndex, updateSessionStorageValue } from "../utils/storage-utils";
 
 class CoreState {
   constructor() {
@@ -38,16 +39,12 @@ class ProjectState {
   }
 
   static getRecentProjects = () => {
-    const str = localStorage.getItem(ProjectState.STORAGE_KEY_RECENT);
-
-    if (str === null) return [];
-
-    const recent = JSON.parse(str);
+    const recent = getLocalStorageIndex(ProjectState.STORAGE_KEY_RECENT);
 
     return Object.values(recent)
       .map(e => {
         return {
-          project: e.project,
+          project: e.value,
           timestamp: new Date(e.timestamp),
         }
       })
@@ -90,37 +87,13 @@ class ProjectState {
   }
 
   autoSave() {
-    sessionStorage.setItem(ProjectState.STORAGE_KEY_PROJECT, JSON.stringify(this));
+    updateSessionStorageValue(ProjectState.STORAGE_KEY_PROJECT, this);
     if (!this.empty())
       this.updateRecentProjects();
   }
 
   updateRecentProjects() {
-    let str = localStorage.getItem(ProjectState.STORAGE_KEY_RECENT);
-    let recent;
-
-    if (str === null)
-      recent = {};
-    else
-      recent = JSON.parse(str);
-
-    const obj = {
-      timestamp: new Date(),
-      project: this,
-    };
-
-    if (!(this.id in recent) &&
-      Object.keys(recent).length >= ProjectState.STORAGE_RECENT_MAX_SIZE) {
-      let oldest = Object.entries(recent)
-        .reduce((old, curr) => {
-          if (new Date(curr[1].timestamp).getTime() < new Date(old[1].timestamp).getTime()) return curr;
-          return old;
-        }, [this.id, obj])[0];
-      delete recent[oldest];
-    }
-
-    recent[this.id] = obj;
-    localStorage.setItem(ProjectState.STORAGE_KEY_RECENT, JSON.stringify(recent));
+    return updateLocalStorageIndex(ProjectState.STORAGE_KEY_RECENT, obj => obj.id, this, ProjectState.STORAGE_RECENT_MAX_SIZE);
   }
 
   setActiveEffects(activeEffects) {

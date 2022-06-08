@@ -1,46 +1,14 @@
+import { getValueFromLocalStorageIndex, updateLocalStorageIndex } from "./storage-utils";
 import { hash } from "./string-utils";
 
 const STORAGE_KEY_FILE_INDEX = "file-index";
 const STORAGE_FILE_INDEX_MAX_SIZE = 100;
 
-export const updateFileIndex = (fileContent) => {
-  const str = localStorage.getItem(STORAGE_KEY_FILE_INDEX);
-  let index;
+export const updateFileIndex = (fileContent) =>
+  updateLocalStorageIndex(STORAGE_KEY_FILE_INDEX, hash, fileContent, STORAGE_FILE_INDEX_MAX_SIZE);
 
-  if (str === null)
-    index = {};
-  else
-    index = JSON.parse(str);
-
-  const h = hash(fileContent);
-  const obj = {
-    timestamp: new Date(),
-    file: fileContent,
-  };
-
-  if (!(h in index) &&
-    Object.keys(index).length >= STORAGE_FILE_INDEX_MAX_SIZE) {
-    let oldest = Object.entries(index)
-      .reduce((old, curr) => {
-        if (new Date(curr[1].timestamp).getTime() < new Date(old[1].timestamp).getTime()) return curr;
-        return old;
-      }, [h, obj])[0];
-    delete index[oldest];
-  }
-
-  index[h] = obj;
-  localStorage.setItem(STORAGE_KEY_FILE_INDEX, JSON.stringify(index));
-  return h;
-};
-
-export const getFileFromIndex = (fileHash) => {
-  const str = localStorage.getItem(STORAGE_KEY_FILE_INDEX);
-
-  if (str === null) return "";
-
-  const index = JSON.parse(str);
-  return fileHash in index ? index[fileHash].file : "";
-};
+export const getFileFromIndex = (fileHash) =>
+  getValueFromLocalStorageIndex(STORAGE_KEY_FILE_INDEX, fileHash);
 
 const processFile = (addSource) => (e) => {
   let reader = new FileReader();
@@ -50,7 +18,7 @@ const processFile = (addSource) => (e) => {
   reader.onload = (e) => {
     let dataURL = e.target.result;
 
-    let fileHash = updateFileIndex(dataURL);
+    let fileHash = updateLocalStorageIndex(STORAGE_KEY_FILE_INDEX, hash, dataURL, STORAGE_FILE_INDEX_MAX_SIZE);
     if (file.type.startsWith('video')) {
       addSource({ type: 'video', hash: fileHash, name: file.name });
     }

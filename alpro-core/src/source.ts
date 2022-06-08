@@ -83,8 +83,8 @@ export class Source {
 
   export(): ExportedSource {
     return {
-      type: this.sourceType.name,
-      data: this.sourceData.src,
+      type: this.sourceType ? this.sourceType.name : null,
+      data: this.sourceData ? this.sourceData.src : null,
     };
   }
 }
