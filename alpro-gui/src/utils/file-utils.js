@@ -1,14 +1,20 @@
-import { getValueFromLocalStorageIndex, updateLocalStorageIndex } from "./storage-utils";
+import storage, { STORE_NAME_FILE_INDEX } from "../models/storage";
 import { hash } from "./string-utils";
 
-const STORAGE_KEY_FILE_INDEX = "file-index";
-const STORAGE_FILE_INDEX_MAX_SIZE = 100;
+const STORAGE_KEY_FILE_INDEX = STORE_NAME_FILE_INDEX;
+export const STORAGE_FILE_INDEX_MAX_SIZE = 100;
 
-export const updateFileIndex = (fileContent) =>
-  updateLocalStorageIndex(STORAGE_KEY_FILE_INDEX, hash, fileContent, STORAGE_FILE_INDEX_MAX_SIZE);
+export const updateFileInIndex = (fileContent) =>
+  storage.updateStoreWithValue(STORAGE_KEY_FILE_INDEX, hash, fileContent, STORAGE_FILE_INDEX_MAX_SIZE);
+
+export const updateFilesInIndex = (fileContents) =>
+  storage.updateStoreWithValues(STORAGE_KEY_FILE_INDEX, hash, fileContents, STORAGE_FILE_INDEX_MAX_SIZE);
 
 export const getFileFromIndex = (fileHash) =>
-  getValueFromLocalStorageIndex(STORAGE_KEY_FILE_INDEX, fileHash);
+  storage.getValueFromStore(STORAGE_KEY_FILE_INDEX, fileHash);
+
+export const getFilesFromIndex = (fileHashes) =>
+  storage.getValuesFromStore(STORAGE_KEY_FILE_INDEX, fileHashes);
 
 const processFile = (addSource) => (e) => {
   let reader = new FileReader();
@@ -18,12 +24,13 @@ const processFile = (addSource) => (e) => {
   reader.onload = (e) => {
     let dataURL = e.target.result;
 
-    let fileHash = updateLocalStorageIndex(STORAGE_KEY_FILE_INDEX, hash, dataURL, STORAGE_FILE_INDEX_MAX_SIZE);
+    updateFileInIndex(dataURL);
+    const fileHash = hash(dataURL);
     if (file.type.startsWith('video')) {
-      addSource({ type: 'video', hash: fileHash, name: file.name });
+      addSource({ type: 'video', hash: fileHash, data: dataURL, name: file.name });
     }
     else {
-      addSource({ type: 'img', hash: fileHash, name: file.name });
+      addSource({ type: 'img', hash: fileHash, data: dataURL, name: file.name });
     }
 
     file_input.value = null;

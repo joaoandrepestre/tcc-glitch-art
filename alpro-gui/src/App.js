@@ -12,7 +12,6 @@ import NewProjectModal from './components/modals/new-project-modal';
 import InitModal from './components/modals/init-modal';
 import './utils/object-utils'; // define Object.id function
 import { getSessionStorageValue } from './utils/storage-utils';
-import { getFileFromIndex } from './utils/file-utils';
 
 
 const COOKIE_KEY_ACCESS = 'accessed';
@@ -82,8 +81,8 @@ class App extends Component {
   }
 
   loadFromStorage = () => {
-    const project = getSessionStorageValue(ProjectState.STORAGE_KEY_PROJECT);
-    if (project !== {}) {
+    const project = getSessionStorageValue(ProjectState.STORAGE_KEY_PROJECT)
+    if (project !== null) {
       this.updateProjectJSON(project);
     } else {
       this.setState({
@@ -212,10 +211,9 @@ class App extends Component {
     const projectName = projectState.name;
     let name = projectName ? projectName : 'project';
 
-    let content = projectState.exportFullState();
     let link = document.createElement('a');
     link.download = name + '.alpro';
-    link.href = `data:text/json;charset=utf-8,${encodeURI(JSON.stringify(content))}`;
+    link.href = `data:text/json;charset=utf-8,${encodeURI(JSON.stringify(projectState))}`;
     link.click();
   }
 
@@ -238,9 +236,8 @@ class App extends Component {
   }
 
   setSource = (source) => {
-    const data = getFileFromIndex(source.hash);
-    if (source.type === 'img') this.updateImgURL(data);
-    if (source.type === 'video') this.updateVidURL(data);
+    if (source.type === 'img') this.updateImgURL(source.data);
+    if (source.type === 'video') this.updateVidURL(source.data);
   }
 
   updateImgURL(dataURL) {

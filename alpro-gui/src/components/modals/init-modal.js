@@ -11,6 +11,7 @@ class InitModal extends Component {
     this.state = {
       activeKey: 'load',
       name: "",
+      recent: [],
     };
   }
 
@@ -28,7 +29,7 @@ class InitModal extends Component {
   render() {
     let textWidth = this.state.name.length * 8.5;
     textWidth = textWidth > 100 ? textWidth : 100;
-    const recent = ProjectState.getRecentProjects();
+    ProjectState.getRecentProjects().then(recent => this.setState({ recent }));
 
     return (
       <Modal
@@ -48,7 +49,7 @@ class InitModal extends Component {
             <Tab eventKey="load" title="Load Project">
               Recent projects
               <ListGroup variant="flush">
-                {recent.map(({ timestamp, project }, idx) => (
+                {this.state.recent.map(({ timestamp, project }, idx) => (
                   <ListGroup.Item key={idx} onClick={this.loadProject(project)}>
                     <Link style={{ cursor: 'pointer' }}>
                       <span style={{ float: 'left', textDecoration: 'inherit' }}>

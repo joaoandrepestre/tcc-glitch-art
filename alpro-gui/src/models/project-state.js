@@ -1,5 +1,6 @@
-import { getFileFromIndex, updateFileIndex } from "../utils/file-utils";
-import { getLocalStorageIndex, updateLocalStorageIndex, updateSessionStorageValue } from "../utils/storage-utils";
+import { getFilesFromIndex, updateFilesInIndex } from "../utils/file-utils";
+import { updateSessionStorageValue } from "../utils/storage-utils";
+import storage, { STORE_NAME_RECENT_PROJECTS } from "./storage";
 
 class CoreState {
   constructor() {
@@ -19,7 +20,7 @@ class CoreState {
 class ProjectState {
 
   static STORAGE_KEY_PROJECT = 'project';
-  static STORAGE_KEY_RECENT = 'recent';
+  static STORAGE_KEY_RECENT = STORE_NAME_RECENT_PROJECTS;
   static STORAGE_RECENT_MAX_SIZE = 5;
 
   static newProject = (name) => {
@@ -38,24 +39,22 @@ class ProjectState {
     return proj;
   }
 
-  static getRecentProjects = () => {
-    const recent = getLocalStorageIndex(ProjectState.STORAGE_KEY_RECENT);
+  static getRecentProjects = () =>
+    storage.getFullStoreByName(ProjectState.STORAGE_KEY_RECENT)
+      .then(recent =>
+        recent.map(e => {
+          return {
+            project: e.value,
+            timestamp: new Date(e.timestamp),
+          }
+        }).sort((a, b) => {
+          const timeA = a.timestamp.getTime();
+          const timeB = b.timestamp.getTime();
 
-    return Object.values(recent)
-      .map(e => {
-        return {
-          project: e.value,
-          timestamp: new Date(e.timestamp),
-        }
-      })
-      .sort((a, b) => {
-        const timeA = a.timestamp.getTime();
-        const timeB = b.timestamp.getTime();
-
-        return timeA > timeB ? -1 :
-          timeB > timeA ? 1 : 0
-      })
-  };
+          return timeA > timeB ? -1 :
+            timeB > timeA ? 1 : 0
+        }).slice(0, this.STORAGE_RECENT_MAX_SIZE)
+      );
 
   constructor(name, id) {
     this.id = id ? id : Object.id(this);
@@ -87,13 +86,19 @@ class ProjectState {
   }
 
   autoSave() {
-    updateSessionStorageValue(ProjectState.STORAGE_KEY_PROJECT, this);
+    let sources = Object.values(this.sources)
+      .map(src => {
+        const { name, type, hash } = src;
+        return { name, type, hash };
+      });
+    let proj = { ...this, sources };
+    updateSessionStorageValue(ProjectState.STORAGE_KEY_PROJECT, proj)
     if (!this.empty())
-      this.updateRecentProjects();
+      this.updateRecentProjects(proj);
   }
 
-  updateRecentProjects() {
-    return updateLocalStorageIndex(ProjectState.STORAGE_KEY_RECENT, obj => obj.id, this, ProjectState.STORAGE_RECENT_MAX_SIZE);
+  updateRecentProjects(project) {
+    storage.updateStoreWithValue(ProjectState.STORAGE_KEY_RECENT, obj => obj.id, project, ProjectState.STORAGE_RECENT_MAX_SIZE);
   }
 
   setActiveEffects(activeEffects) {
@@ -137,33 +142,26 @@ class ProjectState {
     this.autoSave();
   }
 
-  saveSourcesToIndex(srcs) {
-    let sources = {};
+  saveSourcesToIndex() {
+    const srcs = Object.values(this.sources);
+    const fileContents = srcs.map(src => src.data);
 
-    srcs.forEach(src => {
-      let hash = updateFileIndex(src.data);
-      sources[hash] = {
-        hash,
-        name: src.name,
-        type: src.type,
-      };
-    });
-
-    return sources;
+    return updateFilesInIndex(fileContents)
+      .then(hashes =>
+        hashes.map((hash, i) => {
+          const { name, type } = this.sources[hash];
+          return { hash, name, type, };
+        })
+      );
   }
 
   setSources(srcs) {
-    let tmp = srcs;
-
-    if (Array.isArray(srcs)) { // check if the sources have dataurl in it somehow
-      tmp = this.saveSourcesToIndex(srcs);
+    if (Array.isArray(srcs)) {
+      this.getSourcesFromIndex(srcs).then(sources => { this.sources = sources });// add loading
+    } else {
+      this.sources = srcs;
+      this.autoSave();
     }
-    // srcs from saved project has dataurls
-    //   save all to index
-    //   trasnform srcs to have index and not data url
-    this.sources = tmp;
-
-    this.autoSave();
   }
 
   addSource(src) {
@@ -179,17 +177,20 @@ class ProjectState {
     this.autoSave();
   }
 
-  getSourcesFromIndex() {
-    return Object.values(this.sources)
-      .map(src => {
-        return { ...src, data: getFileFromIndex(src.hash) }
+  getSourcesFromIndex(srcs) {
+    const hashes = srcs.map(src => src.hash);
+    return getFilesFromIndex(hashes)
+      .then(values => {
+        const sources = {};
+        values.forEach((value, i) => {
+          sources[hashes[i]] = {
+            ...srcs[i],
+            data: value,
+          };
+        });
+        return sources;
       });
   }
-
-  exportFullState() {
-    return { ...this, sources: this.getSourcesFromIndex() };
-  }
-
 }
 
 export default ProjectState;
