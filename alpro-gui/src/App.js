@@ -391,8 +391,11 @@ class App extends Component {
 
     const { projectState } = this.state;
 
-    let effectMetadatas = this.core.appendEffects(preset.effects);
+    this.core.appendEffects(preset.effects);
+    let effectMetadatas = this.core.getEffectMetadatas();
     projectState.updateCoreEffects(this.core.getExportedEffects());
+    let activeEffects = effectMetadatas.map(f => f.id.toString());
+    projectState.setActiveEffects(activeEffects);
 
     this.setState({
       effectMetadatas,
@@ -481,7 +484,7 @@ class App extends Component {
 
             <PresetsZone
               width={this.state.windowWidth * 0.55}
-              height={190}
+              height={'auto'}
 
               presets={Preset.standardPresets}
               userPresets={userPresets}

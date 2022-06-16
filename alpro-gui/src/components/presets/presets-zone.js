@@ -14,6 +14,15 @@ class PresetsZone extends Component {
     this.props.loadPreset(preset);
   }
 
+  appendPreset = (preset) => () => {
+    this.props.appendPreset(preset);
+  }
+
+  appendRandomPreset = () => {
+    let preset = this.props.createRandomPreset();
+    this.props.appendPreset(preset);
+  }
+
   render() {
     return (
       <div>
@@ -49,6 +58,8 @@ class PresetsZone extends Component {
             <PresetCard
               preset={new Preset('Random', [], require('../../static/presets/random.png'))}
               loadPreset={this.loadRandomPreset}
+              appendPreset={this.appendRandomPreset}
+
             />
             {this.props.userPresets.length > 0 &&
               <Divider orientation="vertical" flexItem />
@@ -59,6 +70,7 @@ class PresetsZone extends Component {
                   key={idx}
                   preset={preset}
                   loadPreset={this.loadPreset(preset)}
+                  appendPreset={this.appendPreset(preset)}
                 />
               )
             }
@@ -69,6 +81,7 @@ class PresetsZone extends Component {
                   key={idx}
                   preset={preset}
                   loadPreset={this.loadPreset(preset)}
+                  appendPreset={this.appendPreset(preset)}
                 />
               )
             }
