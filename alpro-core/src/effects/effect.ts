@@ -1,4 +1,5 @@
 import { DrawConfig } from "regl";
+import { randomInt } from "../utils";
 import Mapper from "./mapper";
 
 type ReglPartialConfig = {
@@ -137,6 +138,29 @@ export class Effect {
     let params = {};
     params[`disabled${this.id}`] = this.disabled;
     return params;
+  }
+
+  randomizeParams(): void {
+    this.forEachParam((key, value) => {
+      if (typeof value === 'object') {
+        if ('selected' in value) {
+          let mapper = <typeof Mapper>this.constructor;
+          let options = Object.values(mapper.options);
+          this[key] = { selected: randomInt(0, options.length - 1) };
+        }
+        else {
+          Object.keys(value).forEach(subKey => {
+            this[key][subKey] = Math.random();
+          });
+        }
+      } else if (typeof value === 'number') {
+        let idx = randomInt(0, 1);
+        this[key] = [-1, 1][idx];
+      } else if (typeof value === 'boolean') {
+        let idx = randomInt(0, 1);
+        this[key] = [false, true][idx];
+      }
+    });
   }
 
   export(): ExportedEffect {

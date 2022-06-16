@@ -26,7 +26,12 @@ class MultiParam extends Component {
   }
 
   render() {
-    const p = Object.entries(this.state.param);
+    let param = {};
+    this.props.value.forEach((v, i) => {
+      let label = this.props.labels[i];
+      param[`${label}`] = v;
+    });
+    const p = Object.entries(param);
     return (
       <div>
         <label style={{ float: "left" }}>{formatLabel(this.props.name)}</label><br />

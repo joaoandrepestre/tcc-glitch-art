@@ -6,11 +6,13 @@ import EffectEditorZone from './components/effect-editors/effect-editor-zone';
 import { Grid } from '@mui/material';
 import SourcesZone from './components/sources-zone/sources-zone';
 import { getCookie, setCookie } from './utils/cookie-utils';
-import Display from './components/display';
+import Display from './components/display/display';
 import ProjectState from './models/project-state';
-import NewProjectModal from './components/modals/new-project-modal';
+import NamingModal from './components/modals/naming-modal';
 import InitModal from './components/modals/init-modal';
 import './utils/object-utils'; // define Object.id function
+import PresetsZone from './components/presets/presets-zone';
+import Preset from './models/preset';
 
 
 const COOKIE_KEY_ACCESS = 'accessed';
@@ -35,6 +37,7 @@ class App extends Component {
 
       showNewProjectModal: false,
       showInitModal: false,
+      showNewPresetModal: false,
 
       isReorderingEffects: false,
       isSourceLoaded: false,
@@ -367,8 +370,66 @@ class App extends Component {
     });
   }
 
+  loadPreset = (preset) => {
+    if (!this.isSourceLoaded()) return;
+
+    const { projectState } = this.state;
+
+    let effectMetadatas = this.core.importEffects(preset.effects);
+    projectState.updateCoreEffects(this.core.getExportedEffects());
+    let activeEffects = effectMetadatas.map(f => f.id.toString());
+    projectState.setActiveEffects(activeEffects);
+
+    this.setState({
+      effectMetadatas,
+      projectState,
+    });
+  }
+
+  appendPreset = (preset) => {
+    if (!this.isSourceLoaded()) return;
+
+    const { projectState } = this.state;
+
+    let effectMetadatas = this.core.appendEffects(preset.effects);
+    projectState.updateCoreEffects(this.core.getExportedEffects());
+
+    this.setState({
+      effectMetadatas,
+      projectState,
+    });
+  }
+
+  createRandomPreset = () => {
+    if (!this.isSourceLoaded()) return;
+
+    return Preset.createRandomPreset(this.core.createRandomEffect);
+  }
+
+  openNewPresetModal = () => {
+    this.setState({
+      showNewPresetModal: true,
+    });
+  }
+
+  saveStateAsPreset = (name) => {
+    if (!this.core.modified()) return;
+
+    const effects = this.core.getExportedEffects();
+    const preview = this.canvas.toDataURL('image/png');
+
+    const preset = new Preset(name, effects, preview);
+
+    ProjectState.saveUserPreset(preset);
+
+    this.setState({
+      showNewPresetModal: false,
+    });
+  }
+
   render() {
     const { projectState } = this.state;
+    const userPresets = ProjectState.getUserPresets();
 
     return (
       <div className="App">
@@ -418,6 +479,17 @@ class App extends Component {
               saveImage={this.exportPNG.bind(this)}
             />
 
+            <PresetsZone
+              width={this.state.windowWidth * 0.55}
+              height={190}
+
+              presets={Preset.standardPresets}
+              userPresets={userPresets}
+              loadPreset={this.loadPreset}
+              appendPreset={this.appendPreset}
+              createRandomPreset={this.createRandomPreset}
+              savePreset={this.openNewPresetModal}
+            />
           </Grid>
           <Grid item>
             <EffectEditorZone
@@ -437,9 +509,20 @@ class App extends Component {
         </Grid>
 
         {/*Modals*/}
-        <NewProjectModal
+        {/*NewProject*/}
+        <NamingModal
           show={this.state.showNewProjectModal}
-          newProject={this.newProject}
+          title={"New Project"}
+          placeholder={"Project Name"}
+          saveName={this.newProject}
+        />
+
+        {/*NewPreset*/}
+        <NamingModal
+          show={this.state.showNewPresetModal}
+          title={"New Preset"}
+          placeholder={"Preset Name"}
+          saveName={this.saveStateAsPreset}
         />
 
         <InitModal

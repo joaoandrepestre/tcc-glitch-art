@@ -113,6 +113,10 @@ export default class Core {
     this.effectsChain.removeEffect(effectId);
   }
 
+  createRandomEffect(): ExportedEffect {
+    return EffectsChain.createRandomEffect();
+  }
+
   reorderEffects(index1: number, index2: number): EffectMetadata[] {
     return this.effectsChain.reorderEffects(index1, index2);
   }
@@ -170,6 +174,15 @@ export default class Core {
       source_result,
       effects_metadatas
     };
+  }
+
+  importEffects(settings: ExportedEffect[]): EffectMetadata[] {
+    this.effectsChain = new EffectsChain(this.regl);
+    return this.effectsChain.import(settings);
+  }
+
+  appendEffects(settings: ExportedEffect[]): EffectMetadata[] {
+    return this.effectsChain.import(settings);
   }
 
   export(): ExportedState {

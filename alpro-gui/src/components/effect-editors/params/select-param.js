@@ -4,17 +4,7 @@ import { formatLabel } from "../../../utils/string-utils";
 
 class SelectParam extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      param: this.props.value,
-    };
-  }
-
   setValue = (e) => {
-    this.setState({
-      param: e.target.value,
-    });
     this.props.setParam(this.props.name, e.target.value);
   }
 
@@ -23,7 +13,7 @@ class SelectParam extends Component {
       <FormControl fullWidth>
         <InputLabel>{formatLabel(this.props.name)}</InputLabel>
         <Select
-          value={this.state.param}
+          value={this.props.value}
           label={formatLabel(this.props.name)}
           onChange={this.setValue}
           size='small'

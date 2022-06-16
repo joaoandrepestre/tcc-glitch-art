@@ -2,7 +2,7 @@ import { TextField } from "@mui/material";
 import { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-class NewProjectModal extends Component {
+class NamingModal extends Component {
 
   constructor(props) {
     super(props);
@@ -28,21 +28,21 @@ class NewProjectModal extends Component {
         keyboard={false}
       >
         <Modal.Header>
-          <Modal.Title>New Project</Modal.Title>
+          <Modal.Title>{this.props.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <TextField
-            label="Project Name"
+            label={this.props.placeholder}
             size='small'
             style={{ width: textWidth, maxWidth: 200 }}
             variant='standard'
             value={this.state.name}
             onChange={(e) => this.changeName(e.target.value)}
-            onKeyUp={(e) => { if (e.key === 'Enter') this.props.newProject(this.state.name) }}
-          /> {this.props.projectName ? '.alpro' : ' '}
+            onKeyUp={(e) => { if (e.key === 'Enter') this.props.saveName(this.state.name) }}
+          />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant='primary' onClick={() => this.props.newProject(this.state.name)}>Ok</Button>
+          <Button variant='primary' onClick={() => this.props.saveName(this.state.name)}>Ok</Button>
         </Modal.Footer>
 
       </Modal>
@@ -50,4 +50,4 @@ class NewProjectModal extends Component {
   }
 }
 
-export default NewProjectModal;
+export default NamingModal;

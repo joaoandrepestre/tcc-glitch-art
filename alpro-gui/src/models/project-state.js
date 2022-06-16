@@ -16,8 +16,11 @@ class CoreState {
 class ProjectState {
 
   static STORAGE_KEY_PROJECT = 'project';
+
   static STORAGE_KEY_RECENT = 'recent';
   static STORAGE_RECENT_MAX_SIZE = 5;
+
+  static STORAGE_KEY_PRESETS = 'presets';
 
   static newProject = (name) => {
     const proj = new ProjectState(name);
@@ -57,6 +60,26 @@ class ProjectState {
           timeB > timeA ? 1 : 0
       })
   };
+
+  static getUserPresets = () => {
+    const str = localStorage.getItem(ProjectState.STORAGE_KEY_PRESETS);
+
+    if (str === null) return [];
+
+    const presets = JSON.parse(str);
+
+    return presets;
+  }
+
+  static saveUserPreset = (preset) => {
+    const str = localStorage.getItem(ProjectState.STORAGE_KEY_PRESETS);
+
+    const presets = str === null ? [] : JSON.parse(str);
+
+    presets.push(preset);
+
+    localStorage.setItem(ProjectState.STORAGE_KEY_PRESETS, JSON.stringify(presets));
+  }
 
   constructor(name, id) {
     this.id = id ? id : Object.id(this);

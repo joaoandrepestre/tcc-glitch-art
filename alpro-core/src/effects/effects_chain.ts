@@ -4,6 +4,7 @@ import Noise from "./noise";
 import Filter from "./filter";
 import Mapper from "./mapper";
 import Wobble from "./wobble";
+import { randomInt } from "../utils";
 
 interface EffectConstructor {
   new(id: number): Effect;
@@ -22,6 +23,19 @@ type PartialShaderCode = {
 export default class EffectsChain {
 
   static fx_reg: EffecstRegistry = {};
+
+  static createRandomEffect = (): ExportedEffect => {
+    const fx_reg_types = Object.keys(EffectsChain.fx_reg);
+    const fx_reg_length = fx_reg_types.length;
+    let t = randomInt(0, fx_reg_length - 1);
+    let type = fx_reg_types[t];
+
+    const effect = new EffectsChain.fx_reg[type](0);
+    effect.randomizeParams();
+    effect.disabled = false;
+
+    return effect.export();
+  };
 
   regl: Regl;
   fx_chain: Effect[];
