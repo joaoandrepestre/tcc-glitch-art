@@ -32,6 +32,7 @@ class PresetsZone extends Component {
           style={{ float: "left" }}
           variant='text'
           size='small'
+          disabled={!this.props.modified}
           onClick={this.props.savePreset}
         >
           Save preset
@@ -56,10 +57,10 @@ class PresetsZone extends Component {
             }}
           >
             <PresetCard
+              disabled={this.props.disabled}
               preset={new Preset('Random', [], require('../../static/presets/random.png'))}
               loadPreset={this.loadRandomPreset}
               appendPreset={this.appendRandomPreset}
-
             />
             {this.props.userPresets.length > 0 &&
               <Divider orientation="vertical" flexItem />
@@ -68,6 +69,7 @@ class PresetsZone extends Component {
               this.props.userPresets.map((preset, idx) =>
                 <PresetCard
                   key={idx}
+                  disabled={this.props.disabled}
                   preset={preset}
                   loadPreset={this.loadPreset(preset)}
                   appendPreset={this.appendPreset(preset)}
@@ -79,6 +81,7 @@ class PresetsZone extends Component {
               this.props.presets.map((preset, idx) =>
                 <PresetCard
                   key={idx}
+                  disabled={this.props.disabled}
                   preset={preset}
                   loadPreset={this.loadPreset(preset)}
                   appendPreset={this.appendPreset(preset)}

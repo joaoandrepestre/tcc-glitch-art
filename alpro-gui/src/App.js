@@ -50,6 +50,12 @@ class App extends Component {
     return this.core.sourceLoaded();
   }
 
+  isModified = () => {
+    if (!this.isSourceLoaded()) return false;
+
+    return this.core.modified();
+  }
+
   defineInputDevices = () => {
     if (!navigator.mediaDevices.enumerateDevices) return;
 
@@ -415,9 +421,10 @@ class App extends Component {
     });
   }
 
-  saveStateAsPreset = (name) => {
+  saveStateAsPreset = (presetName) => {
     if (!this.core.modified()) return;
 
+    const name = presetName === undefined ? " " : presetName;
     const effects = this.core.getExportedEffects();
     const preview = this.canvas.toDataURL('image/png');
 
@@ -485,6 +492,9 @@ class App extends Component {
             <PresetsZone
               width={this.state.windowWidth * 0.55}
               height={'auto'}
+
+              disabled={!this.state.isSourceLoaded}
+              modified={this.isModified()}
 
               presets={Preset.standardPresets}
               userPresets={userPresets}
