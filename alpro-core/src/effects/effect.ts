@@ -34,19 +34,18 @@ export class Effect {
   // basic regl config for displaying an image, used by all effects
   static basicConfig: DrawConfig = {
     attributes: {
-      position: [[-2, -4], [-4, -2], [-4, 2], [-3, 3], [-2, 4], [2, 4], [3, 3], [4, 2], [4, -2], [-2, -4]]
+      position: [[-2, -4], [-2, 4], [4, 0]]
     },
 
     depth: { enable: false },
 
     uniforms: {
       texture: (_, props) => props.texture,
-      time: ctx => ctx.time % 60,
+      time: ctx => ctx.time,
       flipX: (_, props) => props.flipX,
     },
 
-    count: 10,
-    primitive: 'triangle fan',
+    count: 3,
     frag: undefined,
     vert: undefined,
   };
@@ -235,23 +234,6 @@ export class FragEffect extends Effect {
     let main = `if (!disabled${this.id}) {\n`;
     main += super.getFragShaderMain();
     main += '\ncolor = max(min(color, vec3(1)), vec3(0));\n}';
-    return main;
-  }
-}
-
-export class VertEffect extends Effect {
-  constructor(id: number) {
-    super(id);
-  }
-
-  getVertShaderVars(): string {
-    return this.getShaderVars();
-  }
-
-  getVertShaderMain(): string {
-    let main = `if (!disabled${this.id}) {\n`;
-    main += super.getVertShaderMain();
-    main += '\n}';
     return main;
   }
 }

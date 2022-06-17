@@ -1,7 +1,7 @@
-import { VertEffect } from "./effect";
+import { FragEffect } from "./effect";
 
 // Wobble effect, ondulates the image around an axis
-export default class Wobble extends VertEffect {
+export default class Wobble extends FragEffect {
 
   args: object;
 
@@ -14,8 +14,10 @@ export default class Wobble extends VertEffect {
     };
 
     this.config.uniforms[`args${this.id}`] = (_, props) => props[`args${this.id}`];
-    this.config.vert_partial = `
-    pos.x += sin(0.5 * 3.1415926538 * args${this.id}.x * time * pos.y + pos.x) * args${this.id}.y;
+    this.config.frag_partial = `
+    vec2 pos = uv;
+    pos.x += sin(2.0 * 3.1415926538 * args${this.id}.x * pos.y + time) * args${this.id}.y;
+    color = vec3(texture2D(texture, pos));
     `;
   }
 
