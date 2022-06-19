@@ -88,7 +88,7 @@ class Preset {
         "id": 7,
         "params": {
           "disabled": false,
-          "args": { "freq": 0.07, "amp": 0.99 }
+          "args": { "freq": 0.99, "amp": 0.31 }
         }
       }], require('../static/presets/full.png'))
   ];
