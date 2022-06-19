@@ -1,7 +1,7 @@
-import { FragEffect } from "./effect";
+import { VertEffect } from "./effect";
 
 // Wobble effect, ondulates the image around an axis
-export default class Wobble extends FragEffect {
+export default class Wobble extends VertEffect {
 
   args: object;
 

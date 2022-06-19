@@ -1,5 +1,5 @@
 import { DrawCommand, DrawConfig, Regl, Texture } from "regl";
-import { Effect, EffectMetadata, ExportedEffect } from './effect';
+import { Effect, EffectMetadata, ExportedEffect, FragEffect, VertEffect } from './effect';
 import Noise from "./noise";
 import Filter from "./filter";
 import Mapper from "./mapper";
@@ -17,6 +17,11 @@ type EffecstRegistry = {
 type PartialShaderCode = {
   vars: string;
   main: string;
+};
+
+type EffectChunks = {
+  chunks: Effect[][];
+  currIndex: number;
 };
 
 // Chain of effects to be applied in order
@@ -39,9 +44,11 @@ export default class EffectsChain {
 
   regl: Regl;
   fx_chain: Effect[];
+  fx_chunks: EffectChunks;
   nextId: number;
   flipX: number;
-  regl_command: DrawCommand;
+  identity: DrawCommand;
+  regl_commands: DrawCommand[];
 
   constructor(regl: Regl) {
     EffectsChain.fx_reg['noise'] = Noise;
@@ -51,10 +58,16 @@ export default class EffectsChain {
 
     this.regl = regl;
     this.fx_chain = [];
+    this.fx_chunks = { chunks: [], currIndex: 0 };
     this.nextId = 0;
     this.flipX = 1;
 
-    this.regl_command = null;
+    this.identity = this.regl({
+      ...Effect.basicConfig,
+      frag: this.defineFragShader({ vars: '', main: '' }),
+      vert: this.defineVertShader({ vars: '', main: '' })
+    });
+    this.regl_commands = [];
     this.defineReglCommand();
   }
 
@@ -96,41 +109,57 @@ export default class EffectsChain {
   }
 
   defineReglCommand(): void {
-    let config_part = this.fx_chain
-      .reduce((accConfig, fx) => {
+    this.fx_chunks = this.fx_chain.reduce(
+      (chunked: EffectChunks, item: Effect, idx: number) => {
+        if (item instanceof VertEffect && idx !== 0) chunked.currIndex++;
 
-        accConfig.uniforms = {
-          ...accConfig.uniforms,
-          ...fx.config.uniforms
-        };
+        let chunkIndex = chunked.currIndex;
 
-        accConfig.frag_shader.vars += fx.getFragShaderVars();
-        accConfig.frag_shader.main += fx.getFragShaderMain();
+        if (!chunked.chunks[chunkIndex]) {
+          chunked.chunks[chunkIndex] = [];
+        }
+        chunked.chunks[chunkIndex].push(item);
 
-        accConfig.vert_shader.vars += fx.getVertShaderVars();
-        accConfig.vert_shader.main += fx.getVertShaderMain();
+        return chunked;
+      }, { chunks: [], currIndex: 0 });
+    let commands = this.fx_chunks.chunks.map((effects: Effect[]) => {
+      let config_part = effects
+        .reduce((accConfig, fx) => {
 
-        return accConfig;
-      }, {
-        uniforms: {},
-        frag_shader: { vars: '', main: '' },
-        vert_shader: { vars: '', main: '' }
-      });
+          accConfig.uniforms = {
+            ...accConfig.uniforms,
+            ...fx.config.uniforms
+          };
 
-    let frag = this.defineFragShader(config_part.frag_shader);
-    let vert = this.defineVertShader(config_part.vert_shader);
+          accConfig.frag_shader.vars += fx.getFragShaderVars();
+          accConfig.frag_shader.main += fx.getFragShaderMain();
 
-    let config: DrawConfig = {
-      ...Effect.basicConfig,
-      uniforms: {
-        ...Effect.basicConfig.uniforms,
-        ...config_part.uniforms
-      },
-      frag,
-      vert
-    };
+          accConfig.vert_shader.vars += fx.getVertShaderVars();
+          accConfig.vert_shader.main += fx.getVertShaderMain();
 
-    this.regl_command = this.regl(config);
+          return accConfig;
+        }, {
+          uniforms: {},
+          frag_shader: { vars: '', main: '' },
+          vert_shader: { vars: '', main: '' }
+        });
+
+      let frag = this.defineFragShader(config_part.frag_shader);
+      let vert = this.defineVertShader(config_part.vert_shader);
+
+      let config: DrawConfig = {
+        ...Effect.basicConfig,
+        uniforms: {
+          ...Effect.basicConfig.uniforms,
+          ...config_part.uniforms
+        },
+        frag,
+        vert
+      };
+
+      return this.regl(config);
+    });
+    this.regl_commands = commands.length > 0 ? commands : [this.identity];
   }
 
   modified(): boolean {
@@ -143,6 +172,7 @@ export default class EffectsChain {
 
     const fx = new EffectsChain.fx_reg[effect_name](this.nextId++);
     this.fx_chain.push(fx);
+
     this.defineReglCommand();
     return fx.getMetadata();
   }
@@ -198,14 +228,30 @@ export default class EffectsChain {
 
   // Applies all effects, in order, to the src_image
   apply(texture: Texture): void {
-    let params = this.fx_chain
-      .map(fx => fx.getParams())
-      .reduce((accParams, params) => {
-        return {
-          ...accParams,
-          ...params
-        };
-      }, {});
-    this.regl_command({ texture, ...params, flipX: this.flipX });
+    let chunkedParams = this.fx_chunks.chunks
+      .map(chunk => {
+        return chunk.map(fx => fx.getParams())
+          .reduce((accParams, params) => {
+            return {
+              ...accParams,
+              ...params
+            };
+          }, {});
+      });
+    let textures = [texture, null];
+    this.regl_commands.forEach((command, idx) => {
+      let i = idx % 2;
+      let params = chunkedParams[idx];
+      command({ texture: textures[i], ...params, flipX: this.flipX });
+      if (idx < this.regl_commands.length - 1) // should not create new texture for last command
+        textures[(i + 1) % 2] = this.regl.texture({
+          width: textures[i].width,
+          height: textures[i].height,
+          copy: true
+        });
+      if (idx != 0) // should not destroy original texture
+        textures[i].destroy();
+      textures[i] = null;
+    });
   }
 }

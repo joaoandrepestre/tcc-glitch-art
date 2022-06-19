@@ -237,3 +237,9 @@ export class FragEffect extends Effect {
     return main;
   }
 }
+
+export class VertEffect extends FragEffect {
+  constructor(id: number) {
+    super(id);
+  }
+}
