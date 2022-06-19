@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "/tcc-glitch-art/static/css/main.8a6a5bd2.css",
-    "main.js": "/tcc-glitch-art/static/js/main.560083b4.js",
+    "main.js": "/tcc-glitch-art/static/js/main.5eb9bf0b.js",
     "static/media/noisemapper.png": "/tcc-glitch-art/static/media/noisemapper.984a6536474938e00b1d.png",
-    "static/media/full.png": "/tcc-glitch-art/static/media/full.106064446db278d5e93d.png",
     "static/media/noisefilter.png": "/tcc-glitch-art/static/media/noisefilter.770157d7b77f463ccb8b.png",
+    "static/media/full.png": "/tcc-glitch-art/static/media/full.9e37d17ec22e73a54753.png",
     "static/media/doublefilter.png": "/tcc-glitch-art/static/media/doublefilter.3cf76c02ce2fc44f30d2.png",
     "static/media/trakinas_glitch.png": "/tcc-glitch-art/static/media/trakinas_glitch.a6e1a4e8cfb847c948c6.png",
     "index.html": "/tcc-glitch-art/index.html",
     "main.8a6a5bd2.css.map": "/tcc-glitch-art/static/css/main.8a6a5bd2.css.map",
-    "main.560083b4.js.map": "/tcc-glitch-art/static/js/main.560083b4.js.map"
+    "main.5eb9bf0b.js.map": "/tcc-glitch-art/static/js/main.5eb9bf0b.js.map"
   },
   "entrypoints": [
     "static/css/main.8a6a5bd2.css",
-    "static/js/main.560083b4.js"
+    "static/js/main.5eb9bf0b.js"
   ]
 }
