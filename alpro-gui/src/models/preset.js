@@ -90,6 +90,14 @@ class Preset {
           "disabled": false,
           "args": { "freq": 0.99, "amp": 0.31 }
         }
+      },
+      {
+        "type": "tilt",
+        "id": 8,
+        "params": {
+          "disabled": false,
+          "args": { "freq": 0.25, "amp": 0.82, "qty": 0.6 }
+        }
       }], require('../static/presets/full.png'))
   ];
 
