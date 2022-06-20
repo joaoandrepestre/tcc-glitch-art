@@ -18,10 +18,8 @@ export default class Noise extends FragEffect {
 
     this.config.uniforms[`noiseFactor${this.id}`] = (_, props) => props[`noiseFactor${this.id}`];
     this.config.frag_partial = `
-    float t = mod(time, 60.0);
-    float random${this.id} = fract(sin(dot(uv + t, vec2(12.9898,78.233)))*43758.5453123);
     vec3 bounds${this.id} = noiseFactor${this.id} * color;
-    vec3 noise${this.id} = 2.0 * bounds${this.id} * vec3(random${this.id}) - bounds${this.id};
+    vec3 noise${this.id} = 2.0 * bounds${this.id} * vec3(random) - bounds${this.id};
     color += noise${this.id};
     `;
   }

@@ -16,7 +16,7 @@ export default class Wobble extends VertEffect {
     this.config.uniforms[`args${this.id}`] = (_, props) => props[`args${this.id}`];
     this.config.frag_partial = `
     vec2 pos = uv;
-    pos.x += sin(2.0 * 3.1415926538 * args${this.id}.x * pos.y + time) * args${this.id}.y;
+    pos.x += sin(2.0 * pi * args${this.id}.x * pos.y + time) * args${this.id}.y;
     color = vec3(texture2D(texture, pos));
     `;
   }

@@ -5,6 +5,7 @@ import Filter from "./filter";
 import Mapper from "./mapper";
 import Wobble from "./wobble";
 import { randomInt } from "../utils";
+import Tilt from "./tilt";
 
 interface EffectConstructor {
   new(id: number): Effect;
@@ -55,6 +56,7 @@ export default class EffectsChain {
     EffectsChain.fx_reg['filter'] = Filter;
     EffectsChain.fx_reg['mapper'] = Mapper;
     EffectsChain.fx_reg['wobble'] = Wobble;
+    EffectsChain.fx_reg['tilt'] = Tilt;
 
     this.regl = regl;
     this.fx_chain = [];
@@ -80,6 +82,10 @@ export default class EffectsChain {
       ${partialShaderCode.vars}
 
       void main() {
+        float t = mod(time, 60.0);
+        float random = fract(sin(dot(uv + t, vec2(12.9898,78.233)))*43758.5453123);
+        float pi = 3.1415926538;
+        
         vec4 sample = texture2D(texture, uv);
         vec3 color = vec3(sample);
         float alpha = sample.w;
@@ -242,7 +248,8 @@ export default class EffectsChain {
     this.regl_commands.forEach((command, idx) => {
       let i = idx % 2;
       let params = chunkedParams[idx];
-      command({ texture: textures[i], ...params, flipX: this.flipX });
+      let flip = idx === 0 ? this.flipX : 1; // should only flipX on first command
+      command({ texture: textures[i], ...params, flipX: flip });
       if (idx < this.regl_commands.length - 1) // should not create new texture for last command
         textures[(i + 1) % 2] = this.regl.texture({
           width: textures[i].width,
