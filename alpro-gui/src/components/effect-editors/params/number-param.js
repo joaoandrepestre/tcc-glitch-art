@@ -16,7 +16,7 @@ class NumberParam extends Component {
           checked={this.props.value === 1 ? false : true}
           onChange={this.setValue}
           color="default"
-          label={['high', 'low']}
+          label={[this.props.leftLabel, this.props.rightLabel]}
           size='small'
           disabled={this.props.disabled}
         />

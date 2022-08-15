@@ -88,7 +88,7 @@ class Preset {
         "id": 7,
         "params": {
           "disabled": false,
-          "args": { "freq": 0.99, "amp": 0.31 }
+          "args": { "freq": 0.99, "timeFreq": 1.0, "amp": 0.31 }
         }
       },
       {
@@ -96,7 +96,8 @@ class Preset {
         "id": 8,
         "params": {
           "disabled": false,
-          "args": { "freq": 0.25, "amp": 0.82, "qty": 0.6 }
+          "args": { "freq": 0.25, "amp": 0.82, "qty": 0.6 },
+          "direction": 1.0,
         }
       }], require('../static/presets/full.png'))
   ];

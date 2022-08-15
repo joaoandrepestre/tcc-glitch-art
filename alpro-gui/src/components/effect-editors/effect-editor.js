@@ -111,8 +111,8 @@ class EffectEditor extends Component {
                         <NumberParam
                           name={param.name}
                           value={param.value}
-                          leftLabel='High Pass'
-                          rightLabel='Low Pass'
+                          leftLabel={param.name === 'high_low' ? 'High Pass' : 'Horizontal'}
+                          rightLabel={param.name === 'high_low' ? 'Low Pass' : 'Vertical'}
                           setParam={this.setParam.bind(this)}
                           disabled={this.props.isDragging}
                         />
