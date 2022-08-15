@@ -58,6 +58,14 @@ class Preset {
       }], require('../static/presets/noisemapper.png')),
     new Preset("Full", [
       {
+        "type": "pixelate",
+        "id": 9,
+        "params": {
+          "disabled": false,
+          "ratio": { "width": 0.93, "height": 0.93 },
+        }
+      },
+      {
         "type": "mapper",
         "id": 5,
         "params": {

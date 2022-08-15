@@ -42,6 +42,7 @@ export class Effect {
     uniforms: {
       texture: (_, props) => props.texture,
       time: ctx => ctx.time,
+      dimensions: (_, props) => props.dimensions,
       flipX: (_, props) => props.flipX,
     },
 
@@ -98,7 +99,7 @@ export class Effect {
       if (typeof value === 'object'
         && !('selected' in value)) {
         let size = Object.values(value).length;
-        type = `vec${size}`;
+        type = (size > 1) ? `vec${size}` : 'float';
       } else if (typeof value === 'boolean') {
         type = 'bool';
       } else {

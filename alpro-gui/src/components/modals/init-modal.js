@@ -15,7 +15,6 @@ class InitModal extends Component {
   }
 
   loadProject = (proj) => () => {
-    console.log(proj);
     this.props.updateProjectJSON(proj);
   }
 

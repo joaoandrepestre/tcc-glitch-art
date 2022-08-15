@@ -6,6 +6,8 @@ import Mapper from "./mapper";
 import Wobble from "./wobble";
 import { randomInt } from "../utils";
 import Tilt from "./tilt";
+import Pixelate from "./pixelate";
+import { Dimensions } from "../source";
 
 interface EffectConstructor {
   new(id: number): Effect;
@@ -57,6 +59,7 @@ export default class EffectsChain {
     EffectsChain.fx_reg['mapper'] = Mapper;
     EffectsChain.fx_reg['wobble'] = Wobble;
     EffectsChain.fx_reg['tilt'] = Tilt;
+    EffectsChain.fx_reg['pixelate'] = Pixelate;
 
     this.regl = regl;
     this.fx_chain = [];
@@ -78,6 +81,7 @@ export default class EffectsChain {
       precision mediump float;
       uniform sampler2D texture;
       uniform float time;
+      uniform vec2 dimensions;
       varying vec2 uv;
       ${partialShaderCode.vars}
 
@@ -233,7 +237,7 @@ export default class EffectsChain {
   }
 
   // Applies all effects, in order, to the src_image
-  apply(texture: Texture): void {
+  apply(texture: Texture, dimensions: Dimensions): void {
     let chunkedParams = this.fx_chunks.chunks
       .map(chunk => {
         return chunk.map(fx => fx.getParams())
@@ -249,7 +253,7 @@ export default class EffectsChain {
       let i = idx % 2;
       let params = chunkedParams[idx];
       let flip = idx === 0 ? this.flipX : 1; // should only flipX on first command
-      command({ texture: textures[i], ...params, flipX: flip });
+      command({ texture: textures[i], ...params, flipX: flip, dimensions: Object.values(dimensions) });
       if (idx < this.regl_commands.length - 1) // should not create new texture for last command
         textures[(i + 1) % 2] = this.regl.texture({
           width: textures[i].width,

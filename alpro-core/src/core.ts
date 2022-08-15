@@ -132,7 +132,7 @@ export default class Core {
           let flipX = this.source.isWebcam() ? -1 : 1;
           this.defineTexture(flipX);
         }
-        this.effectsChain.apply(this.texture);
+        this.effectsChain.apply(this.texture, { width: this.texture.width, height: this.texture.height });
       }
     });
   }
