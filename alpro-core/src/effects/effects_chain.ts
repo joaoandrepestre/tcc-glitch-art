@@ -68,7 +68,7 @@ export default class EffectsChain {
     this.fx_chunks = { chunks: [], currIndex: 0 };
     this.nextId = 0;
     this.flipX = 1;
-    this.shouldChunk = true;
+    this.shouldChunk = false;
 
     this.identity = this.regl({
       ...Effect.basicConfig,

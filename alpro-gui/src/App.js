@@ -41,7 +41,7 @@ class App extends Component {
 
       isReorderingEffects: false,
       isSourceLoaded: false,
-      shouldChunk: true,
+      shouldChunk: false,
     };
   }
 
