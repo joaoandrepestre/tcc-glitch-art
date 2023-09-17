@@ -101,6 +101,14 @@ export default class Core {
     return this.effectsChain.export();
   }
 
+  getShouldChunk(): boolean {
+    return this.effectsChain.shouldChunk;
+  }
+
+  setShouldChunk(flag: boolean): void {
+    this.effectsChain.setShouldChunk(flag);
+  }
+
   addEffect(effectType: string): EffectMetadata {
     return this.effectsChain.addEffect(effectType); // SHOULD RETURN NEW EFFECT's METADATA
   }

@@ -52,6 +52,7 @@ export default class EffectsChain {
   flipX: number;
   identity: DrawCommand;
   regl_commands: DrawCommand[];
+  shouldChunk: boolean;
 
   constructor(regl: Regl) {
     EffectsChain.fx_reg['noise'] = Noise;
@@ -66,6 +67,7 @@ export default class EffectsChain {
     this.fx_chunks = { chunks: [], currIndex: 0 };
     this.nextId = 0;
     this.flipX = 1;
+    this.shouldChunk = true;
 
     this.identity = this.regl({
       ...Effect.basicConfig,
@@ -75,6 +77,8 @@ export default class EffectsChain {
     this.regl_commands = [];
     this.defineReglCommand();
   }
+
+  
 
   defineFragShader(partialShaderCode: PartialShaderCode): string {
     return `
@@ -121,7 +125,7 @@ export default class EffectsChain {
   defineReglCommand(): void {
     this.fx_chunks = this.fx_chain.reduce(
       (chunked: EffectChunks, item: Effect, idx: number) => {
-        if (item instanceof VertEffect && idx !== 0) chunked.currIndex++;
+        if (this.shouldChunk && item instanceof VertEffect && idx !== 0) chunked.currIndex++;
 
         let chunkIndex = chunked.currIndex;
 
@@ -174,6 +178,10 @@ export default class EffectsChain {
 
   modified(): boolean {
     return this.fx_chain.length > 0;
+  }
+
+  setShouldChunk(flag: boolean): void {
+    this.shouldChunk = flag;
   }
 
   // Adds a new instance of the chosen effect
