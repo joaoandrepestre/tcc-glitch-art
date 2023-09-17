@@ -1,10 +1,10 @@
-import { FragEffect } from './effect';
+import { ColorEffect } from './effect';
 
 // Mapper effect, mixes color color space with the color space chosen by the user
 // parameters:
 //  - color_ratio: porportion of color values to mixed in with the chosen color space
 //  - color_spaces: selected color space, as well as options to choose from 
-export default class Mapper extends FragEffect {
+export default class Mapper extends ColorEffect {
 
   static options = [
     'HSL',
@@ -29,7 +29,7 @@ export default class Mapper extends FragEffect {
 
     this.config.uniforms[`colorRatio${this.id}`] = (_, props) => props[`colorRatio${this.id}`];
     this.config.uniforms[`colorSpace${this.id}`] = (_, props) => props[`colorSpace${this.id}`];
-    this.config.frag_partial = `
+    this.config.color_transform = `
     vec3 other${this.id} = color;
 
     // get Hue, Chroma and Value
@@ -58,7 +58,7 @@ export default class Mapper extends FragEffect {
   setParams(params: object) {
     super.setParams(params);
     if ('color_space' in params) {
-      let color_space = typeof params['color_space'] === 'object' ? params['color_space'].selected : params['color_space'];
+      let color_space = typeof params['color_space'] === 'object' ? params['color_space']['selected'] : params['color_space'];
       this.color_space = { selected: color_space };
       let r = Object.values(this.color_ratio);
       this.color_ratio = { hue: r[0] };

@@ -1,5 +1,5 @@
 import { DrawCommand, DrawConfig, Regl, Texture } from "regl";
-import { Effect, EffectMetadata, ExportedEffect, FragEffect, VertEffect } from './effect';
+import { Effect, EffectMetadata, ExportedEffect, ColorEffect, PositionEffect } from './effect';
 import Noise from "./noise";
 import Filter from "./filter";
 import Mapper from "./mapper";
@@ -19,7 +19,8 @@ type EffecstRegistry = {
 
 type PartialShaderCode = {
   vars: string;
-  main: string;
+  posTransforms: string;
+  colorTransforms: string;
 };
 
 type EffectChunks = {
@@ -71,8 +72,8 @@ export default class EffectsChain {
 
     this.identity = this.regl({
       ...Effect.basicConfig,
-      frag: this.defineFragShader({ vars: '', main: '' }),
-      vert: this.defineVertShader({ vars: '', main: '' })
+      frag: this.defineFragShader({ vars: '', posTransforms: '', colorTransforms: '' }),
+      vert: this.defineVertShader({ vars: '', posTransforms: '', colorTransforms: '' })
     });
     this.regl_commands = [];
     this.defineReglCommand();
@@ -94,10 +95,17 @@ export default class EffectsChain {
         float random = fract(sin(dot(uv + t, vec2(12.9898,78.233)))*43758.5453123);
         float pi = 3.1415926538;
         
-        vec4 sample = texture2D(texture, uv);
-        vec3 color = vec3(sample);
-        float alpha = sample.w;
-        ${partialShaderCode.main}
+        vec2 redPos = uv;
+        vec2 greenPos = uv;
+        vec2 bluePos = uv;
+        ${partialShaderCode.posTransforms}
+
+        vec4 red = texture2D(texture, redPos);
+        float green = texture2D(texture, greenPos).y;
+        float blue = texture2D(texture, bluePos).z;
+        vec3 color = vec3(red.x, green, blue);
+        float alpha = red.w;
+        ${partialShaderCode.colorTransforms}
         gl_FragColor = vec4(color, alpha);
       }
     `;
@@ -110,13 +118,11 @@ export default class EffectsChain {
       uniform float time;
       uniform float flipX;
       varying vec2 uv;
-      ${partialShaderCode.vars}
 
       void main() {
         uv = 0.5 + 0.5 * position;
         vec2 pos = position;
         pos.x = flipX * pos.x;
-        ${partialShaderCode.main}
         gl_Position = vec4(pos, 0, 1.0);
       }
     `;
@@ -125,7 +131,7 @@ export default class EffectsChain {
   defineReglCommand(): void {
     this.fx_chunks = this.fx_chain.reduce(
       (chunked: EffectChunks, item: Effect, idx: number) => {
-        if (this.shouldChunk && item instanceof VertEffect && idx !== 0) chunked.currIndex++;
+        if (this.shouldChunk && item instanceof PositionEffect && idx !== 0) chunked.currIndex++;
 
         let chunkIndex = chunked.currIndex;
 
@@ -146,16 +152,18 @@ export default class EffectsChain {
           };
 
           accConfig.frag_shader.vars += fx.getFragShaderVars();
-          accConfig.frag_shader.main += fx.getFragShaderMain();
+          //accConfig.frag_shader.main += fx.getFragShaderMain();
+          accConfig.frag_shader.posTransforms += fx.getFragShaderPosTransform();
+          accConfig.frag_shader.colorTransforms += fx.getFragShaderColorTransform();
 
           accConfig.vert_shader.vars += fx.getVertShaderVars();
-          accConfig.vert_shader.main += fx.getVertShaderMain();
+          //accConfig.vert_shader.main += fx.getVertShaderMain();
 
           return accConfig;
         }, {
           uniforms: {},
-          frag_shader: { vars: '', main: '' },
-          vert_shader: { vars: '', main: '' }
+          frag_shader: { vars: '', main: '', posTransforms: '', colorTransforms: '' },
+          vert_shader: { vars: '', main: '', posTransforms: '', colorTransforms: '' }
         });
 
       let frag = this.defineFragShader(config_part.frag_shader);

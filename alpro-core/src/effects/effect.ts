@@ -4,8 +4,8 @@ import Mapper from "./mapper";
 
 type ReglPartialConfig = {
   uniforms: object,
-  frag_partial: string,
-  vert_partial: string,
+  pos_transform: string,
+  color_transform: string,
 }
 
 export type ExportedEffect = {
@@ -60,8 +60,8 @@ export class Effect {
     this.id = id;
     this.config = {
       uniforms: {},
-      frag_partial: '',
-      vert_partial: ''
+      pos_transform: '',
+      color_transform: '',
     }
     this.disabled = false;
 
@@ -120,12 +120,12 @@ export class Effect {
     return '';
   }
 
-  getFragShaderMain(): string {
-    return this.config.frag_partial;
+  getFragShaderPosTransform(): string {
+    return this.config.pos_transform;
   }
 
-  getVertShaderMain(): string {
-    return this.config.vert_partial;
+  getFragShaderColorTransform(): string {
+    return this.config.color_transform;
   }
 
   setParams(params: object) {
@@ -221,7 +221,7 @@ export class Effect {
   }
 }
 
-export class FragEffect extends Effect {
+export class ColorEffect extends Effect {
 
   constructor(id: number) {
     super(id);
@@ -231,16 +231,27 @@ export class FragEffect extends Effect {
     return this.getShaderVars();
   }
 
-  getFragShaderMain(): string {
+  getFragShaderColorTransform(): string {
     let main = `if (!disabled${this.id}) {\n`;
-    main += super.getFragShaderMain();
+    main += super.getFragShaderColorTransform();
     main += '\ncolor = max(min(color, vec3(1)), vec3(0));\n}';
-    return main;
+    return main; 
   }
 }
 
-export class VertEffect extends FragEffect {
+export class PositionEffect extends Effect {
   constructor(id: number) {
     super(id);
+  }
+
+  getFragShaderVars(): string {
+    return this.getShaderVars();
+  }
+  
+  getFragShaderPosTransform(): string {
+    let main = `if (!disabled${this.id}) {\n`;
+    main += super.getFragShaderPosTransform();
+    main += '\n}\n';
+    return main;
   }
 }

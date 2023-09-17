@@ -1,10 +1,10 @@
-import { FragEffect } from './effect';
+import { ColorEffect } from './effect';
 
 // Filter effect, applies a rgb filter to the image
 // parameters:
 //  - threshold: from 0 to 1, indicates the cut-off point for the filter for each rgb component
 //  - high_low: 1 or -1, indicates if the filter is low pass or high pass. Defaults to 1, high pass
-export default class Filter extends FragEffect {
+export default class Filter extends ColorEffect {
 
   threshold: object;
   high_low: number;
@@ -21,7 +21,7 @@ export default class Filter extends FragEffect {
 
     this.config.uniforms[`threshold${this.id}`] = (_, props) => props[`threshold${this.id}`];
     this.config.uniforms[`highLow${this.id}`] = (_, props) => props[`highLow${this.id}`];
-    this.config.frag_partial = `
+    this.config.color_transform = `
     vec3 diff${this.id} = highLow${this.id} * (sign(color - threshold${this.id})) - 1.0;
     color += color * diff${this.id};
     `;

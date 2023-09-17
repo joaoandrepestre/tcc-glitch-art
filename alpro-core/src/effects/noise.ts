@@ -1,9 +1,9 @@
-import { FragEffect } from "./effect";
+import { ColorEffect } from "./effect";
 
 // Noise effect, applies some white noise to the image
 // parameters: 
 //  - noiseFactor: factor from 0 to 1 of the intensity of the noise for each color component
-export default class Noise extends FragEffect {
+export default class Noise extends ColorEffect {
 
   noise_factor: object;
 
@@ -17,7 +17,7 @@ export default class Noise extends FragEffect {
     };
 
     this.config.uniforms[`noiseFactor${this.id}`] = (_, props) => props[`noiseFactor${this.id}`];
-    this.config.frag_partial = `
+    this.config.color_transform = `
     vec3 bounds${this.id} = noiseFactor${this.id} * color;
     vec3 noise${this.id} = 2.0 * bounds${this.id} * vec3(random) - bounds${this.id};
     color += noise${this.id};
