@@ -18,15 +18,22 @@ class EffectEditorZone extends Component {
   }
 
   render() {
+    var query = new URLSearchParams(window.location.search);
+    var debug = query.get('debug');
+    let s;
+    if(debug !== null && debug === '1'){
+      s = <><Switch
+      checked={this.props.shouldChunk}
+      onClickCapture={this.setShouldChunk}
+      size="small"
+      /><br/></>
+    } else {
+      s = <br/>;
+    }
     return (
       <div>
         <strong className="me-auto" style={{ float: "left" }}>Effects</strong>
-        <Switch
-          checked={this.props.shouldChunk}
-          onClickCapture={this.setShouldChunk}
-          size="small"
-        />
-        <br />
+        {s}
         <Button
           className='me-auto'
           style={{ float: "left" }}
