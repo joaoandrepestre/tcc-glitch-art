@@ -182,6 +182,7 @@ export default class EffectsChain {
 
   setShouldChunk(flag: boolean): void {
     this.shouldChunk = flag;
+    this.defineReglCommand();
   }
 
   // Adds a new instance of the chosen effect

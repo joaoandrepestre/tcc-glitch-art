@@ -41,6 +41,7 @@ class App extends Component {
 
       isReorderingEffects: false,
       isSourceLoaded: false,
+      shouldChunk: true,
     };
   }
 
@@ -75,6 +76,7 @@ class App extends Component {
       this.setState({
         windowWidth: e.target.innerWidth,
         windowHeight: window.innerHeight - 61,
+        shouldChunk: this.core.getShouldChunk()
       });
     };
 
@@ -306,6 +308,13 @@ class App extends Component {
     link.click();
   }
 
+  setShouldChunk = (flag) => {
+    this.core.setShouldChunk(flag);
+    this.setState({
+      shouldChunk: flag,
+    });
+  } 
+
   addEffect = (effectType) => {
     const { effectMetadatas, projectState } = this.state;
 
@@ -517,6 +526,8 @@ class App extends Component {
               reorderEffects={this.reorderEffects.bind(this)}
               isDragging={this.state.isReorderingEffects}
               startReordering={this.startReordering.bind(this)}
+              shouldChunk={this.state.shouldChunk}
+              setShouldChunk={this.setShouldChunk.bind(this)}
             />
           </Grid>
         </Grid>

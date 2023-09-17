@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { Accordion } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import EffectEditor from './effect-editor';
-import { Button, Card } from '@mui/material';
+import { Button, Card, Switch } from '@mui/material';
 
 class EffectEditorZone extends Component {
 
@@ -12,10 +12,21 @@ class EffectEditorZone extends Component {
     this.props.reorderEffects(result.source.index, result.destination.index);
   }
 
+  setShouldChunk = (e) => {
+    e.nativeEvent.stopImmediatePropagation();
+    this.props.setShouldChunk(e.target.checked);
+  }
+
   render() {
     return (
       <div>
-        <strong className="me-auto" style={{ float: "left" }}>Effects</strong><br />
+        <strong className="me-auto" style={{ float: "left" }}>Effects</strong>
+        <Switch
+          checked={this.props.shouldChunk}
+          onClickCapture={this.setShouldChunk}
+          size="small"
+        />
+        <br />
         <Button
           className='me-auto'
           style={{ float: "left" }}
